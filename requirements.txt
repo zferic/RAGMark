@@ -2,7 +2,7 @@ torch==2.6.0
 transformers==4.49.0
 datasets==3.3.2
 sentence-transformers==3.4.1
-faiss-gpu==1.8.0
+# faiss-gpu==1.8.0  # install via conda: conda install -c pytorch faiss-gpu=1.8.0
 llmlingua==0.2.2
 rank-bm25==0.2.2
 numpy==1.24.4
