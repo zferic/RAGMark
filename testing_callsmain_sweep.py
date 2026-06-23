@@ -13,9 +13,7 @@ import json
 # -------------------------------------------------------------------------
 # Config
 # -------------------------------------------------------------------------
-#BASE_OUT   = "/scratch/feric.z/ragbench_outputs"
-BASE_OUT = "/projects/nucar/feric.z/randstuff/newsrc/data"
-OUT_SUFFIX = "_a100"   # appended to testingevals / timingevals dir names
+from config import BASE_OUT, OUT_SUFFIX, base_index_data, data_index2018, DATASET_DIR
 
 EVAL_SIZE  = 100
 BATCH_SIZE = 1
@@ -25,9 +23,6 @@ gen_models = [
     "meta-llama/Llama-3.2-3B-Instruct",
     "meta-llama/Llama-3.2-1B-Instruct",
 ]
-
-base_index_data = "/projects/nucar/feric.z/wikiindex2/"
-data_index2018  = "/projects/nucar/feric.z/FLashRAG-z/test_sample_2018_sent.jsonl"
 
 ret_models = [
      ["intfloat/e5-base-v2",
@@ -60,13 +55,12 @@ ret_models = _discover_indexes(base_index_data)
 '''
 
 datasets = [
-    "/home/feric.z/FlashRAG/examples/quick_start/dataset/hotpotqa_dataset.jsonl",
-    "/home/feric.z/FlashRAG/examples/quick_start/dataset/nq_dataset.jsonl",
-     "/home/feric.z/FlashRAG/examples/quick_start/dataset/squad_dataset.jsonl",
-     "/home/feric.z/FlashRAG/examples/quick_start/dataset/triviaqa_dataset.jsonl",
-     "/home/feric.z/FlashRAG/examples/quick_start/dataset/popqa_dataset.jsonl",
-     "/home/feric.z/FlashRAG/examples/quick_start/dataset/webquestions_dataset.jsonl",
-
+    os.path.join(DATASET_DIR, "hotpotqa_dataset.jsonl"),
+    os.path.join(DATASET_DIR, "nq_dataset.jsonl"),
+    os.path.join(DATASET_DIR, "squad_dataset.jsonl"),
+    os.path.join(DATASET_DIR, "triviaqa_dataset.jsonl"),
+    os.path.join(DATASET_DIR, "popqa_dataset.jsonl"),
+    os.path.join(DATASET_DIR, "webquestions_dataset.jsonl"),
 ]
 
 #pipelines = ["iterative"]

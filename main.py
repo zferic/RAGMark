@@ -6,7 +6,7 @@ import torch
 import re
 import random
 
-HF_HOME = "/projects/nucar/feric.z/hf_home"
+from config import HF_HOME
 os.makedirs(HF_HOME, exist_ok=True)
 
 # Keep auth vars; reset only cache paths
@@ -89,9 +89,7 @@ args = parser.parse_args()
 # -------------------------------------------------------------------------
 # BASE OUTPUT DIRECTORY
 # -------------------------------------------------------------------------
-BASE_OUT = "/projects/nucar/feric.z/randstuff/newsrc/data"
-BASE_OUT = "/scratch/feric.z/ragbench_outputs"
-#BASE_OUT = "/media/zman/extrahd2/FlashRAG/randstuff/newsrc/data"
+from config import BASE_OUT
 
 #TESTING_DIR = f"{BASE_OUT}/testingevals"
 #TIMING_DIR = f"{BASE_OUT}/timingevals"

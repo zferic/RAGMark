@@ -5,7 +5,7 @@ import sys
 # -----------------------------
 # CONFIG: where main.py writes outputs
 # -----------------------------
-BASE_OUT = "/projects/nucar/feric.z/randstuff/newsrc/data"
+from config import BASE_OUT, base_index_data, data_index2018, DATASET_DIR
 TESTING_DIR = os.path.join(BASE_OUT, "testingevals")
 TIMING_DIR  = os.path.join(BASE_OUT, "timingevals")
 
@@ -149,12 +149,6 @@ gen_models = [
 # Define Data Index and Embedding pairs
 # -----------------------------
 
-base_index_data = "/projects/nucar/feric.z/wikiindex2/"
-
-
-data_index2018 = "/projects/nucar/feric.z/FLashRAG-z/test_sample_2018_sent.jsonl"
-
-
 ret_models = [
     ["intfloat/e5-base-v2",  base_index_data + "e5-base-v2-2018/index/e5_Flat.index", data_index2018],
     ["intfloat/e5-small-v2", base_index_data + "e5-small-v2-2018/index/e5_Flat.index", data_index2018],
@@ -175,11 +169,11 @@ ret_models = [
 # -----------------------------
 ##
 datasets = [
-    "/home/feric.z/FlashRAG/examples/quick_start/dataset/squad_dataset.jsonl",
-    "/home/feric.z/FlashRAG/examples/quick_start/dataset/nq_dataset.jsonl",
-    "/home/feric.z/FlashRAG/examples/quick_start/dataset/triviaqa_dataset.jsonl",
-    "/home/feric.z/FlashRAG/examples/quick_start/dataset/popqa_dataset.jsonl",
-    "/home/feric.z/FlashRAG/examples/quick_start/dataset/webquestions_dataset.jsonl",
+    os.path.join(DATASET_DIR, "squad_dataset.jsonl"),
+    os.path.join(DATASET_DIR, "nq_dataset.jsonl"),
+    os.path.join(DATASET_DIR, "triviaqa_dataset.jsonl"),
+    os.path.join(DATASET_DIR, "popqa_dataset.jsonl"),
+    os.path.join(DATASET_DIR, "webquestions_dataset.jsonl"),
 ]
 
 # Now these are real booleans

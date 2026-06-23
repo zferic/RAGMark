@@ -17,7 +17,7 @@ import torch
 # -------------------------------------------------------------------------
 # HF cache setup (same as main.py)
 # -------------------------------------------------------------------------
-HF_HOME = "/projects/nucar/feric.z/hf_home"
+from config import HF_HOME, BASE_OUT
 os.makedirs(HF_HOME, exist_ok=True)
 for k in ["TRANSFORMERS_CACHE","HF_HOME","HF_HUB_CACHE","HUGGINGFACE_HUB_CACHE",
           "XDG_CACHE_HOME","HF_ASSETS_CACHE","HF_DATASETS_CACHE","HF_MODULES_CACHE"]:
@@ -63,7 +63,7 @@ parser.add_argument("--sweep_configs", type=str, required=True,
                     help='JSON array of config dicts')
 # Output
 parser.add_argument("--base_out", type=str,
-                    default="/scratch/feric.z/ragbench_outputs")
+                    default=BASE_OUT)
 parser.add_argument("--out_suffix", type=str, default="",
                     help='e.g. "_a100" appended to testingevals/timingevals dir names')
 parser.add_argument("--pipeline", type=str, default="standard",
