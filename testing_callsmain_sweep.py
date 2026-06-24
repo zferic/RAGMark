@@ -194,5 +194,5 @@ for model in gen_models:
                                            batch=batch, rerank=rerank, rerank_model=rerank_model,
                                            rerank_top_n=rerank_top_n, pipeline=pipeline)
                             if rc != 0:
-                                print(f"❌ Sweep failed (rc={rc}) for {model} / {ret_model} / "
+                                print(f"FAILED: Sweep failed (rc={rc}) for {model} / {ret_model} / "
                                       f"pipeline={pipeline} / batch={batch} / rerank={rerank} / {rerank_model}")

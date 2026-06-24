@@ -179,7 +179,7 @@ out_csv      = f"{TESTING_DIR}/results_{filename_prefix_base}.csv"
 
 
 if os.path.exists(out_csv):
-    print(f"⚠️ Results already exist: {out_csv}")
+    print(f"[WARNING] Results already exist: {out_csv}")
     print("Exiting before loading models.")
     exit(0)
 
@@ -293,7 +293,7 @@ init_timing.capture_all_gpu_memory("init_gpu_start")
 # -----------------------------------------------------------------------------
 # Load embedding model - why is this only capturing cpu memory?
 # -----------------------------------------------------------------------------
-print("\n🔹 Loading embedding model...")
+print("\nLoading embedding model...")
 
 init_timing.capture_cpu_memory("load_embedder_cpu_before")
 
@@ -313,7 +313,7 @@ if args.use_rag:
     # -----------------------------------------------------------------------------
     # Load FAISS corpus (CPU)
     # -----------------------------------------------------------------------------
-    print("🔹 Loading FAISS corpus...")
+    print("Loading FAISS corpus...")
 
     init_timing.capture_cpu_memory("load_corpus_cpu_before")
 
@@ -368,22 +368,22 @@ import subprocess
 
 if args.use_rag:
 
-    print("\n🔎 FAISS Diagnostics --------------------")
+    print("\nFAISS Diagnostics --------------------")
 
-    # 1️⃣ Confirm index type
+    # 1. Confirm index type
     try:
         print("FAISS index object:", retriever.index)
         print("FAISS ntotal:", retriever.index.ntotal)
     except Exception as e:
         print("Could not access retriever.index:", e)
 
-    # 2️⃣ Torch GPU memory (what PyTorch sees)
+    # 2. Torch GPU memory (what PyTorch sees)
     for i in range(torch.cuda.device_count()):
         allocated = torch.cuda.memory_allocated(i) / (1024**3)
         reserved = torch.cuda.memory_reserved(i) / (1024**3)
         print(f"[Torch] GPU {i} allocated: {allocated:.2f} GB | reserved: {reserved:.2f} GB")
 
-    # 3️⃣ What NVIDIA sees (true total GPU usage)
+    # 3. What NVIDIA sees (true total GPU usage)
     print("\n[nvidia-smi output]")
     subprocess.run(["nvidia-smi"])
     print("------------------------------------------------\n")
@@ -391,7 +391,7 @@ if args.use_rag:
 # -----------------------------------------------------------------------------
 # Load generator model
 # -----------------------------------------------------------------------------
-print("🔹 Loading generator model...")
+print("Loading generator model...")
 
 init_timing.capture_cpu_memory("load_generator_cpu_before")
 
@@ -413,14 +413,14 @@ RERANK_DEVICE = parse_device(args.rerank_device)
 reranker = None
 if args.rerank:
     from rag_system.reranking import Reranker
-    print(f"🔹 Reranking enabled: {args.rerank_model} top_n={args.rerank_top_n}")
+    print(f"Reranking enabled: {args.rerank_model} top_n={args.rerank_top_n}")
     init_timing.capture_gpu_memory("load_reranker_gpu_before", RERANK_DEVICE)
     reranker = Reranker(args.rerank_model, device=RERANK_DEVICE)
     init_timing.capture_gpu_memory("load_reranker_gpu_after", RERANK_DEVICE)
 
 compressor = None
 if args.compress:
-    print(f"🔹 Compression enabled: {args.compress_method} with rate {args.compression_rate}")
+    print(f"Compression enabled: {args.compress_method} with rate {args.compression_rate}")
 
     init_timing.capture_cpu_memory("load_compressor_cpu_before")
     init_timing.capture_gpu_memory("load_compressor_gpu_before", COMPRESS_DEVICE)
@@ -430,7 +430,7 @@ if args.compress:
     init_timing.capture_cpu_memory("load_compressor_cpu_after")
     init_timing.capture_gpu_memory("load_compressor_gpu_after", COMPRESS_DEVICE)
 
-print("\n🔹 Loading evaluation dataset...")
+print("\nLoading evaluation dataset...")
 with open(args.eval_path, "r") as f:
     eval_data = [json.loads(line) for line in f]
 
@@ -468,7 +468,7 @@ if args.use_rag:
 # Persist once in init timing
 init_timing.data.update(device_info)
 
-print(f"\n🔹 Building pipeline: {args.pipeline}...")
+print(f"\nBuilding pipeline: {args.pipeline}...")
 pipeline = PIPELINES[args.pipeline](
     embedder=embedder,
     retriever=retriever if args.use_rag else None,
@@ -563,5 +563,5 @@ out_csv = f"{TESTING_DIR}/results_{filename_prefix_base}.csv"
 
 df.to_csv(out_csv, index=False)
 
-print(f"\n✅ DONE! Saved results to {out_csv}")
+print(f"\nDONE! Saved results to {out_csv}")
 print(f"Timing traces and JSONL saved to timingevals/")

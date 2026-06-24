@@ -258,7 +258,7 @@ for model in gen_models:
                                                     perf_csv    = os.path.join(TIMING_DIR,  f"perfiii_{filename_prefix}.csv")
 
                                                     if all(os.path.exists(p) for p in [results_csv, perf_jsonl, perf_csv]):
-                                                        print(f"✅ Skipping {filename_prefix} – outputs exist.")
+                                                        print(f"Skipping {filename_prefix} - outputs exist.")
                                                         continue
 
                                                     print(
@@ -293,4 +293,4 @@ for model in gen_models:
                                                     )
 
                                                     if rc != 0:
-                                                        print(f"❌ Run failed (return code {rc}) for {filename_prefix}")
+                                                        print(f"FAILED: Run failed (return code {rc}) for {filename_prefix}")

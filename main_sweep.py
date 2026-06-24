@@ -166,7 +166,7 @@ all_done = all(
     for cfg in sweep_configs
 )
 if all_done:
-    print("✅ All configs already complete. Nothing to do.")
+    print("All configs already complete. Nothing to do.")
     exit(0)
 
 # -------------------------------------------------------------------------
@@ -201,7 +201,7 @@ init_timing.capture_cpu_memory("init_cpu_start")
 init_timing.capture_all_gpu_memory("init_gpu_start")
 
 # Embedder
-print("🔹 Loading embedder...")
+print("Loading embedder...")
 init_timing.capture_cpu_memory("load_embedder_cpu_before")
 embedder = EmbeddingModel(args.retrieval_model)
 init_timing.capture_cpu_memory("load_embedder_cpu_after")
@@ -213,14 +213,14 @@ need_rag = any(cfg["use_rag"] for cfg in sweep_configs)
 retriever = None
 corpus = None
 if need_rag:
-    print("🔹 Loading corpus...")
+    print("Loading corpus...")
     init_timing.capture_cpu_memory("load_corpus_cpu_before")
     with open(args.retrieval_json, "r") as f:
         corpus = [json.loads(line)["text"] for line in f]
     init_timing.capture_cpu_memory("load_corpus_cpu_after")
     init_timing.capture_all_gpu_memory("load_corpus_gpu_after")
 
-    print("🔹 Loading FAISS index...")
+    print("Loading FAISS index...")
     init_timing.capture_all_gpu_memory("load_faiss_gpu_before")
     init_timing.capture_all_nvml_memory("load_faiss_nvml_before")
     init_timing.capture_cpu_memory("load_faiss_cpu_before")
@@ -233,7 +233,7 @@ if need_rag:
     print(f"  Corpus: {len(corpus)}, FAISS ntotal: {retriever.index.ntotal}")
 
 # Generator
-print("🔹 Loading generator...")
+print("Loading generator...")
 init_timing.capture_cpu_memory("load_generator_cpu_before")
 generator = Generator(args.model_path, device=GEN_DEVICE)
 init_timing.capture_cpu_memory("load_generator_cpu_after")
@@ -243,7 +243,7 @@ init_timing.data["generator_device"] = str(GEN_DEVICE)
 reranker = None
 if args.rerank:
     from rag_system.reranking import Reranker
-    print(f"🔹 Loading reranker: {args.rerank_model} top_n={args.rerank_top_n}")
+    print(f"Loading reranker: {args.rerank_model} top_n={args.rerank_top_n}")
     init_timing.capture_gpu_memory("load_reranker_gpu_before", RERANK_DEVICE)
     reranker = Reranker(args.rerank_model, device=RERANK_DEVICE)
     init_timing.capture_gpu_memory("load_reranker_gpu_after", RERANK_DEVICE)
@@ -251,7 +251,7 @@ init_timing.data["rerank"]       = args.rerank
 init_timing.data["rerank_model"] = args.rerank_model
 init_timing.data["rerank_top_n"] = args.rerank_top_n
 
-print(f"\n✅ Fixed components loaded. Starting dataset loop...\n")
+print(f"\nFixed components loaded. Starting dataset loop...\n")
 
 # -------------------------------------------------------------------------
 # Dataset loop — sweep over all configs for each dataset
@@ -269,10 +269,10 @@ for eval_path in eval_paths:
     print(f"{'='*60}")
 
     if not pending:
-        print("  ✅ Already complete, skipping.")
+        print("  Already complete, skipping.")
         continue
 
-    print("🔹 Loading eval data...")
+    print("Loading eval data...")
     with open(eval_path, "r") as f:
         all_data = [json.loads(line) for line in f]
     random.seed(55)
@@ -413,6 +413,6 @@ for eval_path in eval_paths:
         pd.DataFrame(results, columns=["gold","prediction","rouge","f1","em","recall"]).to_csv(
             f"{TESTING_DIR}/results_{prefix}.csv", index=False)
 
-        print(f"  ✅ Saved: {prefix}")
+        print(f"  Saved: {prefix}")
 
-print("\n🎉 Sweep complete.")
+print("\nSweep complete.")
