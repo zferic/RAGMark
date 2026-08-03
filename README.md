@@ -25,6 +25,20 @@ A benchmarking pipeline for Retrieval-Augmented Generation (RAG) systems. Runs a
 | **QA datasets** | NQ, TriviaQA, SQuAD, WebQuestions, PopQA, HotpotQA (via [FlashRAG](https://github.com/RUC-NLPIR/FlashRAG)) |
 | **Retrieval corpus** | Wikipedia 2018 dump (~9.2M passages) |
 
+## Artifact Evaluation (IISWC 2026)
+
+For reviewers: all AE documentation, experiment definitions, and the quick-run script are in [`ae_evaluation/`](ae_evaluation/).
+
+```bash
+# Verify the full pipeline end-to-end (small representative run, ~minutes):
+bash ae_evaluation/ae_quick.sh
+
+# Full paper experiments:
+python run_sweep_configs.py
+```
+
+See [`ae_evaluation/AE_README.md`](ae_evaluation/AE_README.md) for pre-run checklist, expected outputs, and figure-to-script mapping.
+
 ## First-run setup
 
 ### 1. Install dependencies
@@ -114,6 +128,6 @@ Update the `BASE_OUT` and `OUT_SUFFIX` variables at the top of the notebook to m
 | `run_sweep.py` | Multi-config execution engine; loads fixed components once per sweep group |
 | `run_sweep_configs.py` | Sweep orchestrator — prepares sweep settings and invokes `run_sweep.py` |
 | `load_evals_executed.ipynb` | Loads and merges all result files into DataFrames |
-| `scripts/ae_quick.sh` | Reduced representative AE run using sweep pipeline |
+| `ae_evaluation/ae_quick.sh` | Reduced representative AE run using sweep pipeline |
 | `requirements.txt` | Python dependencies |
 | `rag_system/` | Core RAG modules (embedding, retrieval, generation, compression, reranking, timing) |

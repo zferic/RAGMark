@@ -15,7 +15,7 @@ Scope:
 From the repository root:
 
 ```bash
-bash scripts/ae_quick.sh
+bash ae_evaluation/ae_quick.sh
 ```
 
 This command runs one reduced, representative benchmark configuration through the full RAGMark execution path:
@@ -98,7 +98,7 @@ Figure-specific analysis mapping:
 ## 6. Representative Runtime Expectations
 
 Approximate expectations on a prepared GPU machine:
-- Quick check (`bash scripts/ae_quick.sh`): usually minutes.
+- Quick check (`bash ae_evaluation/ae_quick.sh`): usually minutes.
 - Full sweep (`python run_sweep_configs.py` with multiple models/datasets): hours.
 
 Runtime variability is expected based on model size, GPU type, and index placement (CPU vs GPU).
