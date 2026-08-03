@@ -34,7 +34,9 @@ For reviewers: all AE documentation, experiment definitions, and the quick-run s
 bash ae_evaluation/ae_quick.sh
 
 # Full paper experiments:
-python run_sweep_configs.py
+python run_sweep_fig4_fig9.py
+# or, for the compression-rate sweep:
+python run_sweep_fig5.py
 ```
 
 See [`ae_evaluation/AE_README.md`](ae_evaluation/AE_README.md) for pre-run checklist, expected outputs, and figure-to-script mapping.
@@ -91,7 +93,7 @@ WIKI_INDEX_DIR/
 
 ### 4. Configure the sweep
 
-Edit `run_sweep_configs.py` to set:
+Edit `run_sweep_fig4_fig9.py` to set the Fig. 4 / Fig. 9 sweep grid, or `run_sweep_fig5.py` for the Fig. 5 compression sweep:
 
 - `gen_models` — list of HuggingFace generator model IDs
 - `ret_models` — list of `[retrieval_model_id, index_path, corpus_jsonl]` triples
@@ -103,7 +105,9 @@ Edit `run_sweep_configs.py` to set:
 
 ```bash
 # Sweep mode (groups configs by model+retriever+dataset, loads each once):
-python run_sweep_configs.py
+python run_sweep_fig4_fig9.py
+# or, for the compression-rate sweep:
+python run_sweep_fig5.py
 ```
 
 Results are skipped automatically if output files already exist.
@@ -126,7 +130,8 @@ Update the `BASE_OUT` and `OUT_SUFFIX` variables at the top of the notebook to m
 |------|---------|
 | `config.py` | All configurable paths — edit this first |
 | `run_sweep.py` | Multi-config execution engine; loads fixed components once per sweep group |
-| `run_sweep_configs.py` | Sweep orchestrator — prepares sweep settings and invokes `run_sweep.py` |
+| `run_sweep_fig4_fig9.py` | Sweep orchestrator for Fig. 4 / Fig. 9 (reranking and naive runs) |
+| `run_sweep_fig5.py` | Sweep orchestrator for Fig. 5 (compression-rate sweep) |
 | `load_evals_executed.ipynb` | Loads and merges all result files into DataFrames |
 | `ae_evaluation/ae_quick.sh` | Reduced representative AE run using sweep pipeline |
 | `requirements.txt` | Python dependencies |

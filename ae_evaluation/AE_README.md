@@ -63,10 +63,12 @@ Per configuration, the artifact writes:
 
 ## 4. Running Representative Paper Experiments
 
-Primary experiment path used for paper-scale benchmarking:
+Primary experiment paths used for paper-scale benchmarking:
 
 ```bash
-python run_sweep_configs.py
+python run_sweep_fig4_fig9.py
+# or, for the compression-rate sweep:
+python run_sweep_fig5.py
 ```
 
 Notes:
@@ -79,13 +81,13 @@ Paper-aligned sweep definitions (from the appendix):
 - Exp. 2 / Fig. 5 (compression-rate latency): `compress=True`, `compress_method="llmlingua2"`, `top_ks=[1,3,5,10]`, `compress_rates=[0.2,0.4,0.6,0.8]`.
 - Exp. 3 / Fig. 9 (TTFT-vs-ROUGE trade-off): naive configuration (`rerank=False`, `compress=False`), `top_ks=[0,1,3,5,10]`, all 3 generators.
 
-These settings are configured in `run_sweep_configs.py` and executed through `run_sweep.py`.
+These settings are configured in `run_sweep_fig4_fig9.py` (Fig. 4 / Fig. 9) or `run_sweep_fig5.py` (Fig. 5) and executed through `run_sweep.py`.
 
 ## 5. Script-to-Figure/Table Data Mapping
 
 Use this mapping when verifying how data is produced:
 
-- `run_sweep_configs.py` -> `run_sweep.py` -> `results_*.csv`, `perfiii_*.csv/jsonl`, `trace_*.jsonl`
+- `run_sweep_fig4_fig9.py` / `run_sweep_fig5.py` -> `run_sweep.py` -> `results_*.csv`, `perfiii_*.csv/jsonl`, `trace_*.jsonl`
   - Main source for multi-configuration comparison figures/tables.
 - `load_evals_executed.ipynb`
   - Loads and aggregates `results_*`, `perfiii_*`, and `trace_*` files into analysis DataFrames used for plotting/reporting.
@@ -99,7 +101,7 @@ Figure-specific analysis mapping:
 
 Approximate expectations on a prepared GPU machine:
 - Quick check (`bash ae_evaluation/ae_quick.sh`): usually minutes.
-- Full sweep (`python run_sweep_configs.py` with multiple models/datasets): hours.
+- Full sweep (`python run_sweep_fig4_fig9.py` or `python run_sweep_fig5.py` with multiple models/datasets): hours.
 
 Runtime variability is expected based on model size, GPU type, and index placement (CPU vs GPU).
 

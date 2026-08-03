@@ -3,7 +3,7 @@ run_sweep.py
 
 Loads embedder, FAISS index, generator, and eval data ONCE,
 then iterates over a list of (compress_method, rate, topk, use_rag) configs.
-Called by run_sweep_configs.py with --sweep_configs as a JSON array.
+Called by run_sweep_fig4_fig9.py or run_sweep_fig5.py with --sweep_configs as a JSON array.
 """
 
 import argparse

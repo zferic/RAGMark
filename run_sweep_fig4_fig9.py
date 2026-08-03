@@ -1,9 +1,16 @@
 """
-run_sweep_configs.py
+run_sweep_fig4_fig9.py
 
-Orchestrator for run_sweep.py.
-Groups configs by (model, ret_model, dataset) so that embedder/FAISS/generator
-are loaded ONCE per group instead of once per config.
+Orchestrator for Fig. 4 (reranking latency/accuracy) and Fig. 9 (TTFT vs ROUGE trade-off).
+
+Fig. 4 — rerank=True, top_ks=[0,1,3,5,10], all 3 generators x 6 datasets.
+Fig. 9 — naive pipeline (rerank=False, compress=False), top_ks=[0,1,3,5,10], all 3 generators.
+
+Both experiments share the same model/dataset/top-k grid and are produced
+by a single sweep pass: the naive configs (rerank=False) feed Fig. 9,
+and the reranked configs (rerank=True) feed Fig. 4.
+
+Run via: python run_sweep_fig4_fig9.py
 """
 import subprocess
 import os
@@ -66,26 +73,26 @@ datasets = [
 #pipelines = ["iterative"]
 pipelines = ["standard"]
 
-reranks        = [False]
-rerank_top_ns  = [3, 5]
+# Fig. 4: rerank=True with rerank_top_n sweep; Fig. 9: rerank=False (naive)
+# Both share top_ks=[0,1,3,5,10] — run both in sequence via reranks=[False, True]
+reranks        = [False, True]        # False  → Fig. 9 (naive);  True → Fig. 4 (reranking)
+rerank_top_ns  = [5]                  # top_n used for reranked retrieval
 rerank_models  = ["cross-encoder/ms-marco-MiniLM-L-6-v2"]
 
 # Device config
 EMBED_DEVICE    = "cuda:0"
 GEN_DEVICE      = "cuda:0"
-INDEX_DEVICE    = "cuda:0,cuda:1"   # change to "cpu" for hardware placement run
-#INDEX_DEVICE    = "cuda:0"   # change to "cpu" for hardware placement run
-INDEX_DEVICE    = "cpu"   # change to "cpu" for hardware placement run
-
+INDEX_DEVICE    = "cpu"
 COMPRESS_DEVICE = "cuda:0"
 RERANK_DEVICE   = "cuda:0"
 
 # Inner sweep parameters
-userags          = [False]
-compresss        = [False]
-compress_methods = ["llmlingua2", "sc"]   # longllmlingua excluded
-compress_rates   = [.25, 0.5, .75]
-top_ks           = [1, 3, 5, 10]
+# Fig. 4 / Fig. 9: top_ks=[0,1,3,5,10], no compression
+userags          = [True]             # RAG enabled for both figures
+compresss        = [False]            # no compression in Fig. 4 / Fig. 9
+compress_methods = ["none"]
+compress_rates   = [1.0]
+top_ks           = [0, 1, 3, 5, 10]  # per appendix Exp. 1 and Exp. 3
 batches          = [False]
 
 env = os.environ.copy()
