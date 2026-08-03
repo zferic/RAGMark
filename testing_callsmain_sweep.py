@@ -26,7 +26,7 @@ gen_models = [
 
 ret_models = [
      ["intfloat/e5-base-v2",
-      base_index_data + "e5-base-v2-2018/index/e5_Flat.index",
+    os.path.join(base_index_data, "e5-base-v2-2018", "index", "e5_Flat.index"),
       data_index2018],
 ]
 

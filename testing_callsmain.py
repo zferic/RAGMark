@@ -150,15 +150,15 @@ gen_models = [
 # -----------------------------
 
 ret_models = [
-    ["intfloat/e5-base-v2",  base_index_data + "e5-base-v2-2018/index/e5_Flat.index", data_index2018],
-    ["intfloat/e5-small-v2", base_index_data + "e5-small-v2-2018/index/e5_Flat.index", data_index2018],
-    ["intfloat/e5-large-v2",  base_index_data + "index2018-e5-large/index/e5_Flat.index", data_index2018]
+    ["intfloat/e5-base-v2",  os.path.join(base_index_data, "e5-base-v2-2018", "index", "e5_Flat.index"), data_index2018],
+    ["intfloat/e5-small-v2", os.path.join(base_index_data, "e5-small-v2-2018", "index", "e5_Flat.index"), data_index2018],
+    ["intfloat/e5-large-v2", os.path.join(base_index_data, "index2018-e5-large", "index", "e5_Flat.index"), data_index2018]
 ]
 
 
 """
 ret_models = [
-    ["intfloat/e5-large-v2",  base_index_data + "index2018-e5-large/index/e5_Flat.index", data_index2018]
+    ["intfloat/e5-large-v2", os.path.join(base_index_data, "index2018-e5-large", "index", "e5_Flat.index"), data_index2018]
    
 ]
 """

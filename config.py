@@ -1,17 +1,16 @@
 import os
 
-# Edit these paths when moving to a new system or cluster
+# Local paths on the current hard drive for this workspace
+HF_HOME = "/mnt/nvme1n1p1/zman/ragmark_data/hf_home"
 
-HF_HOME = "/projects/nucar/feric.z/hf_home"
+BASE_OUT = "/mnt/nvme1n1p1/zman/ragmark_data/outputs"
+OUT_SUFFIX = "_local"
 
-BASE_OUT   = "/scratch/feric.z/ragbench_outputs"
-OUT_SUFFIX = "_a100"
-
-WIKI_INDEX_DIR   = "/projects/nucar/feric.z/wikiindex2/"
-WIKI_CORPUS_2018 = "/projects/nucar/feric.z/FLashRAG-z/test_sample_2018_sent.jsonl"
+WIKI_INDEX_DIR = "/mnt/nvme1n1p1/zman/ragmark_data/wikiindex"
+WIKI_CORPUS_2018 = "/mnt/nvme1n1p1/zman/ragmark_data/corpus/test_sample_2018_sent.jsonl"
 
 # Short aliases matching variable names used throughout the codebase
 base_index_data = WIKI_INDEX_DIR
-data_index2018  = WIKI_CORPUS_2018
+data_index2018 = WIKI_CORPUS_2018
 
-DATASET_DIR = "/home/feric.z/FlashRAG/examples/quick_start/dataset"
+DATASET_DIR = "/mnt/nvme1n1p1/zman/ragmark_data/datasets"
