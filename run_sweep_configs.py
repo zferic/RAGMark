@@ -1,7 +1,7 @@
 """
-testing_callsmain_sweep.py
+run_sweep_configs.py
 
-Orchestrator for main_sweep.py.
+Orchestrator for run_sweep.py.
 Groups configs by (model, ret_model, dataset) so that embedder/FAISS/generator
 are loaded ONCE per group instead of once per config.
 """
@@ -130,7 +130,7 @@ def run_sweep(model, ret_model, index_path, corpus_path, eval_paths, batch=True,
     paths_json    = json.dumps(eval_paths)
 
     command = [
-        "python", "-u", "main_sweep.py",
+        "python", "-u", "run_sweep.py",
         "--model_path",      model,
         "--retrieval_model", ret_model,
         "--retrieval_index", index_path,

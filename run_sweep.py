@@ -1,9 +1,9 @@
 """
-main_sweep.py
+run_sweep.py
 
 Loads embedder, FAISS index, generator, and eval data ONCE,
 then iterates over a list of (compress_method, rate, topk, use_rag) configs.
-Called by testing_callsmain.py with --sweep_configs as a JSON array.
+Called by run_sweep_configs.py with --sweep_configs as a JSON array.
 """
 
 import argparse
@@ -15,7 +15,7 @@ import hashlib
 import torch
 
 # -------------------------------------------------------------------------
-# HF cache setup (same as main.py)
+# HF cache setup
 # -------------------------------------------------------------------------
 from config import HF_HOME, BASE_OUT
 os.makedirs(HF_HOME, exist_ok=True)

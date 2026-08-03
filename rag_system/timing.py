@@ -476,7 +476,7 @@ class RAGTiming:
 def profile_block(name, profiler_enabled, trace_path=None):
     """
     Wrap a block with PyTorch profiler if enabled.
-    This ensures consistent behavior across main.py.
+    This ensures consistent behavior across benchmark entrypoints.
     """
     if profiler_enabled:
         with TorchProfiler(save_path=trace_path) as prof:

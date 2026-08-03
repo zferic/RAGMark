@@ -66,7 +66,7 @@ Per configuration, the artifact writes:
 Primary experiment path used for paper-scale benchmarking:
 
 ```bash
-python testing_callsmain_sweep.py
+python run_sweep_configs.py
 ```
 
 Notes:
@@ -74,29 +74,19 @@ Notes:
 - Runtime is much longer than quick mode.
 - Existing completed configurations are skipped when expected output files already exist.
 
-Secondary validation path:
-
-```bash
-python testing_callsmain.py
-```
-
-Use this for independent single-config style runs via `main.py`.
-
 Paper-aligned sweep definitions (from the appendix):
 - Exp. 1 / Fig. 4 (reranking latency/accuracy): `rerank=True`, `top_ks=[0,1,3,5,10]`, all 3 generators x 6 datasets.
 - Exp. 2 / Fig. 5 (compression-rate latency): `compress=True`, `compress_method="llmlingua2"`, `top_ks=[1,3,5,10]`, `compress_rates=[0.2,0.4,0.6,0.8]`.
 - Exp. 3 / Fig. 9 (TTFT-vs-ROUGE trade-off): naive configuration (`rerank=False`, `compress=False`), `top_ks=[0,1,3,5,10]`, all 3 generators.
 
-These settings are configured in `testing_callsmain_sweep.py` and executed through `main_sweep.py`.
+These settings are configured in `run_sweep_configs.py` and executed through `run_sweep.py`.
 
 ## 5. Script-to-Figure/Table Data Mapping
 
 Use this mapping when verifying how data is produced:
 
-- `testing_callsmain_sweep.py` -> `main_sweep.py` -> `results_*.csv`, `perfiii_*.csv/jsonl`, `trace_*.jsonl`
+- `run_sweep_configs.py` -> `run_sweep.py` -> `results_*.csv`, `perfiii_*.csv/jsonl`, `trace_*.jsonl`
   - Main source for multi-configuration comparison figures/tables.
-- `testing_callsmain.py` -> `main.py` -> `results_*.csv`, `perfiii_*.csv/jsonl`
-  - Cross-check path for per-configuration comparisons.
 - `load_evals_executed.ipynb`
   - Loads and aggregates `results_*`, `perfiii_*`, and `trace_*` files into analysis DataFrames used for plotting/reporting.
 
@@ -109,7 +99,7 @@ Figure-specific analysis mapping:
 
 Approximate expectations on a prepared GPU machine:
 - Quick check (`bash scripts/ae_quick.sh`): usually minutes.
-- Full sweep (`python testing_callsmain_sweep.py` with multiple models/datasets): hours.
+- Full sweep (`python run_sweep_configs.py` with multiple models/datasets): hours.
 
 Runtime variability is expected based on model size, GPU type, and index placement (CPU vs GPU).
 
@@ -124,6 +114,6 @@ Runtime variability is expected based on model size, GPU type, and index placeme
 
 ## 8. Reproducibility Notes
 
-- `main_sweep.py` and `main.py` encode run configuration in output filenames.
-- `main_sweep.py` uses fixed random seed sampling (`random.seed(55)`) for evaluation subset selection.
+- `run_sweep.py` encodes run configuration in output filenames.
+- `run_sweep.py` uses fixed random seed sampling (`random.seed(55)`) for evaluation subset selection.
 - Re-running with identical inputs and environment should reproduce the same selected evaluation subset and output file naming convention.

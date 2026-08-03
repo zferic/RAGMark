@@ -68,7 +68,7 @@ if [[ ! -f "$DATASET_PATH" ]]; then
   exit 1
 fi
 
-"$PYTHON_BIN" -u main_sweep.py \
+"$PYTHON_BIN" -u run_sweep.py \
   --model_path "$MODEL" \
   --retrieval_model "$RET_MODEL" \
   --retrieval_index "$INDEX_PATH" \

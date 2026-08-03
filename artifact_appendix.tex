@@ -77,8 +77,8 @@ conda install -c pytorch faiss-gpu=1.8.0   # or faiss-cpu
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Experiment workflow}
-Each experiment is a sweep config in \texttt{testing\_callsmain\_sweep.py},
-run via \texttt{python testing\_callsmain\_sweep.py}:
+Each experiment is a sweep config in \texttt{run\_sweep\_configs.py},
+run via \texttt{python run\_sweep\_configs.py}:
 
 \begin{itemize}
   \item {\bf Exp. 1 (Fig.~4, reranking): } \texttt{rerank=True}, \texttt{top\_ks=[0,1,3,5,10]}, all 3 generators $\times$ 6 datasets.

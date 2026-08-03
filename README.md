@@ -77,7 +77,7 @@ WIKI_INDEX_DIR/
 
 ### 4. Configure the sweep
 
-Edit `testing_callsmain_sweep.py` (recommended) or `testing_callsmain.py` to set:
+Edit `run_sweep_configs.py` to set:
 
 - `gen_models` — list of HuggingFace generator model IDs
 - `ret_models` — list of `[retrieval_model_id, index_path, corpus_jsonl]` triples
@@ -89,10 +89,7 @@ Edit `testing_callsmain_sweep.py` (recommended) or `testing_callsmain.py` to set
 
 ```bash
 # Sweep mode (groups configs by model+retriever+dataset, loads each once):
-python testing_callsmain_sweep.py
-
-# Grid mode (runs each config independently):
-python testing_callsmain.py
+python run_sweep_configs.py
 ```
 
 Results are skipped automatically if output files already exist.
@@ -114,10 +111,9 @@ Update the `BASE_OUT` and `OUT_SUFFIX` variables at the top of the notebook to m
 | File | Purpose |
 |------|---------|
 | `config.py` | All configurable paths — edit this first |
-| `main.py` | Single-config entry point (called by orchestrators) |
-| `main_sweep.py` | Multi-config entry point; groups configs to avoid redundant model loads |
-| `testing_callsmain.py` | Grid orchestrator — calls `main.py` per config |
-| `testing_callsmain_sweep.py` | Sweep orchestrator — calls `main_sweep.py` per group |
+| `run_sweep.py` | Multi-config execution engine; loads fixed components once per sweep group |
+| `run_sweep_configs.py` | Sweep orchestrator — prepares sweep settings and invokes `run_sweep.py` |
 | `load_evals_executed.ipynb` | Loads and merges all result files into DataFrames |
+| `scripts/ae_quick.sh` | Reduced representative AE run using sweep pipeline |
 | `requirements.txt` | Python dependencies |
 | `rag_system/` | Core RAG modules (embedding, retrieval, generation, compression, reranking, timing) |
