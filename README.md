@@ -1,6 +1,29 @@
 # RAGMark
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 A benchmarking pipeline for Retrieval-Augmented Generation (RAG) systems. Runs a configurable sweep of models, datasets, retrieval indexes, and compression settings, recording accuracy and performance traces per query.
+
+## Features
+
+- Per-query, per-stage profiling: embedding, FAISS retrieval, reranking, compression, generation
+- Accuracy metrics (EM, F1, ROUGE-L, retrieval recall) and performance metrics (TTFT, decode latency, tokens/sec, GPU power/energy, utilization)
+- Loads models and indexes once per sweep group to avoid redundant reloading across configs
+- Standard (single-pass) and iterative (multi-round retrieval) pipelines
+- Independent CPU/GPU device placement per component (embedder, index, reranker, compressor, generator)
+- Skips already-completed configs, so interrupted sweeps resume cleanly
+
+## Supported models & datasets
+
+| | |
+|---|---|
+| **Generators** | Llama-3.2-1B-Instruct, Llama-3.2-3B-Instruct, Llama-3-8B-Instruct |
+| **Embedders** | e5-small-v2, e5-base-v2, e5-large-v2 |
+| **Reranker** | cross-encoder/ms-marco-MiniLM-L-6-v2 |
+| **Compression** | LLMLingua, LLMLingua-2, Selective-Context |
+| **Index types** | Flat, IVF, IVF-SQ |
+| **QA datasets** | NQ, TriviaQA, SQuAD, WebQuestions, PopQA, HotpotQA (via [FlashRAG](https://github.com/RUC-NLPIR/FlashRAG)) |
+| **Retrieval corpus** | Wikipedia 2018 dump (~9.2M passages) |
 
 ## First-run setup
 
