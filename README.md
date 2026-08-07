@@ -2,7 +2,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-A benchmarking pipeline for Retrieval-Augmented Generation (RAG) systems. Runs a configurable sweep of models, datasets, retrieval indexes, and compression settings, recording accuracy and performance traces per query.
+An experimental benchmark for Retrieval-Augmented Generation (RAG) systems across models, datasets, retrieval indexes, pipelines, and compression settings, recording accuracy and performance traces per query.
 
 ## Features
 
@@ -13,7 +13,7 @@ A benchmarking pipeline for Retrieval-Augmented Generation (RAG) systems. Runs a
 - Independent CPU/GPU device placement per component (embedder, index, reranker, compressor, generator)
 - Skips already-completed configs, so interrupted sweeps resume cleanly
 
-## Supported models & datasets
+## Models & datasets evaluated in the publication
 
 | | |
 |---|---|
@@ -24,6 +24,8 @@ A benchmarking pipeline for Retrieval-Augmented Generation (RAG) systems. Runs a
 | **Index types** | Flat, IVF, IVF-SQ |
 | **QA datasets** | NQ, TriviaQA, SQuAD, WebQuestions, PopQA, HotpotQA (via [FlashRAG](https://github.com/RUC-NLPIR/FlashRAG)) |
 | **Retrieval corpus** | Wikipedia 2018 dump (~9.2M passages) |
+
+This table reflects what the paper's experiments cover, not a hard limit — the framework is built around standard Hugging Face interfaces, so swapping in pretty much any other Hugging Face generator, embedder, reranker, or dataset is a config change, not a code change.
 
 ## Artifact Evaluation (IISWC 2026)
 
@@ -93,7 +95,13 @@ WIKI_INDEX_DIR/
 
 ### 4. Configure the sweep
 
-Edit `ae_evaluation/run_sweep_fig4_fig9.py` to set the Fig. 4 / Fig. 9 sweep grid, or `ae_evaluation/run_sweep_fig5.py` for the Fig. 5 compression sweep:
+`run_sweep.py` is the general execution engine — it takes a JSON-encoded list of configs
+(`--sweep_configs`) plus model/retriever/device args, evaluates each one, and writes results,
+grouping runs by model+retriever+dataset so fixed components load only once. In practice you
+drive it via a small orchestrator script that builds that JSON and invokes `run_sweep.py` as a
+subprocess. `ae_evaluation/run_sweep_fig4_fig9.py` and `ae_evaluation/run_sweep_fig5.py` (example
+configurations, wired up for this paper's own experiments) are a good starting point to copy and
+adapt:
 
 - `gen_models` — list of HuggingFace generator model IDs
 - `ret_models` — list of `[retrieval_model_id, index_path, corpus_jsonl]` triples
@@ -104,10 +112,7 @@ Edit `ae_evaluation/run_sweep_fig4_fig9.py` to set the Fig. 4 / Fig. 9 sweep gri
 ### 5. Run
 
 ```bash
-# Sweep mode (groups configs by model+retriever+dataset, loads each once):
-python ae_evaluation/run_sweep_fig4_fig9.py
-# or, for the compression-rate sweep:
-python ae_evaluation/run_sweep_fig5.py
+python your_sweep_script.py   # e.g. a copy of one of the example configurations above
 ```
 
 Results are skipped automatically if output files already exist.
@@ -134,7 +139,7 @@ reproductions (PNGs + CSVs under `ae_evaluation/figures/{plots,data}/`) without 
 This runs all cells and saves the outputs back into the `.ipynb` in place, so reopening it later still
 shows the results. Requires `jupyter`, `pandas`, and `matplotlib` installed in `.venv` (see First-run setup).
 
-## File overview
+## High Level Repository Overview
 
 | File | Purpose |
 |------|---------|
