@@ -8,7 +8,7 @@ RAGMark is a hardware benchmarking framework for advanced Retrieval-Augmented Ge
 
 This appendix describes how to access our code artifact and install it on any supported hardware.
 
-To reproduce the figures in our paper, we provide access to a remote execution environment that allows reviewers to run the benchmark and generate data and three figures from our paper: Case 1 (naive, Fig.~9), Case 2 (reranking, Fig.~4), and Case 3 (compression, Fig.~5). The remote machine uses different GPUs than those used in our paper evaluation (V100-16GB vs. our A100-40GB); however, we believe this also demonstrates the portability of the benchmark, and the significant impact that both the RAG configuration and the underlying hardware platform have on the final results.
+To reproduce the figures in our paper, we provide access to a remote execution environment that allows reviewers to run the benchmark and generate data for three figures from our paper: Case 1 (naive, Fig.~9), Case 2 (reranking, Fig.~4), and Case 3 (compression, Fig.~5). See ``Hardware dependencies'' below for how this evaluation machine's hardware differs from the one used in the paper.
 
 
 
@@ -39,13 +39,16 @@ To reproduce the figures in our paper, we provide access to a remote execution e
 [NOTE: repo currently private — must be public by submission, per the paper's own open-source commitment.]
 
 \subsubsection{Hardware dependencies}
-Paper results were measured on 2$\times$ NVIDIA A100-SXM4-40GB GPUs; the artifact
-evaluation machine instead provides 2$\times$ NVIDIA V100-PCIE-16GB GPUs. An NVIDIA GPU
-is recommended in general, and the framework is otherwise hardware-agnostic across
-NVIDIA devices and CPU-only platforms, following our installation guide. Multi-GPU is
-required to reproduce the exact GPU0/GPU1 placement study in Sections 4.7 and 4.8.
-Single-GPU or CPU-only conditions reproduce the accuracy results and a subset of the
-performance results.
+Paper results were measured on 2$\times$ NVIDIA A100-SXM4-40GB GPUs, which the
+university cannot provide remote access to. We instead provide 2$\times$ NVIDIA
+V100-PCIE-16GB GPUs — an older, lower-memory generation. Absolute numbers (latency,
+energy, memory) will not match the paper here, though they are reproducible on
+matching hardware. We believe this also showcases RAGMark's portability across
+hardware, and the impact both RAG configuration and hardware platform have on results.
+
+NVIDIA GPU is recommended; the framework is otherwise hardware-agnostic (NVIDIA or
+CPU). Multi-GPU is needed for the GPU0/GPU1 study (Sections 4.7-4.8); single-GPU/CPU
+still reproduces accuracy and some performance results.
 
 \subsubsection{Software dependencies}
 
@@ -95,9 +98,9 @@ For this evaluation, we provide \texttt{ae\_evaluation/ae\_eval.sh} to load the 
 The script runs two sweep scripts followed by our analysis notebook (executed headlessly), which renders the figures below directly to \texttt{ae\_evaluation/figures/}:
 
 \begin{itemize}
-  \item {\bf Exp. 1 (Fig.~4, reranking): } \texttt{rerank=True}, \texttt{top\_ks=[0,1,3,5,10]}, all 3 generators $\times$ 6 datasets.
-  \item {\bf Exp. 2 (Fig.~5, compression): } \texttt{compress=True}, \texttt{compress\_method="llmlingua2"}, \texttt{top\_ks=[1,3,5,10]}, \texttt{compress\_rates=[0.2,0.4,0.6,0.8]}.
-  \item {\bf Exp. 3 (Fig.~9, trade-off): } naive pipeline (\texttt{rerank=False}, \texttt{compress=False}), \texttt{top\_ks=[0,1,3,5,10]}, all 3 generators.
+  \item {\bf Exp. 1 -- Case 2, Reranking Analysis (Section 4.3, Fig.~4): } \texttt{rerank=True}, \texttt{top\_ks=[0,1,3,5,10]}, all 3 generators $\times$ 6 datasets.
+  \item {\bf Exp. 2 -- Case 3, Compression Analysis (Section 4.4, Fig.~5): } \texttt{compress=True}, \texttt{compress\_method="llmlingua2"}, \texttt{top\_ks=[1,3,5,10]}, \texttt{compress\_rates=[0.2,0.4,0.6,0.8]}.
+  \item {\bf Exp. 3 -- Case 1, Naive Pipeline Analysis / Trade-offs (Sections 4.2 \& 4.8, Fig.~9): } naive pipeline (\texttt{rerank=False}, \texttt{compress=False}), \texttt{top\_ks=[0,1,3,5,10]}, all 3 generators.
 \end{itemize}
 
 Please note that RAG configuration support depends on the hardware support. A particular RAG configuration (e.g. 10 retrieved documents or a large LLM) may require substantially more compute than is available. Therefore, not all results that we ran on the A100 can be reproduced in the artifact evaluation V100 execution environment. 
@@ -105,12 +108,14 @@ Please note that RAG configuration support depends on the hardware support. A pa
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Evaluation and expected results}
 \texttt{ae\_evaluation/load\_evals\_executed.ipynb} loads all output files into
-\texttt{df\_results}/\texttt{df\_perf}/\texttt{df\_trace}.
+\texttt{df\_results}/\texttt{df\_perf}/\texttt{df\_trace}, then reproduces the figures below and
+writes each one to \texttt{ae\_evaluation/figures/plots/*.png}, alongside the exact aggregated
+data table it was built from in \texttt{ae\_evaluation/figures/data/*.csv}.
 
 \begin{itemize}
-  \item {\bf Fig.~4: } \texttt{df\_perf} stage latencies (embed, FAISS, TTFT, decode) plus rerank duration recovered from \texttt{df\_trace}, merged with \texttt{df\_results} (ROUGE-L), grouped by dataset $\times$ model $\times$ top-$k$.
-  \item {\bf Fig.~5: } \texttt{df\_perf} stage latencies (embed, FAISS, TTFT, decode) plus compression duration recovered from \texttt{df\_trace}, filtered to the compression sweep and grouped by top-$k$ $\times$ compression rate $r$.
-  \item {\bf Fig.~9: } \texttt{df\_results} (ROUGE-L) merged with \texttt{df\_perf} (TTFT, decode, memory, SM\%), grouped by model $\times$ top-$k$, naive pipeline only.
+  \item {\bf Case 1 -- Naive Pipeline Analysis (Sections 4.2 \& 4.8, Fig.~9): } \texttt{df\_results} (ROUGE-L) merged with \texttt{df\_perf} (TTFT, decode, memory, SM\%), grouped by model $\times$ top-$k$, naive pipeline only.
+  \item {\bf Case 2 -- Reranking Analysis (Section 4.3, Fig.~4): } \texttt{df\_perf} stage latencies (embed, FAISS, TTFT, decode) plus rerank duration recovered from \texttt{df\_trace}, merged with \texttt{df\_results} (ROUGE-L), grouped by dataset $\times$ model $\times$ top-$k$.
+  \item {\bf Case 3 -- Compression Analysis (Section 4.4, Fig.~5): } \texttt{df\_perf} stage latencies (embed, FAISS, TTFT, decode) plus compression duration recovered from \texttt{df\_trace}, filtered to the compression sweep and grouped by top-$k$ $\times$ compression rate $r$.
 \end{itemize}
 
 
