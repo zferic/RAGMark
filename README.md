@@ -34,9 +34,9 @@ For reviewers: all AE documentation, experiment definitions, and the quick-run s
 bash ae_evaluation/ae_quick.sh
 
 # Full paper experiments:
-python run_sweep_fig4_fig9.py
+python ae_evaluation/run_sweep_fig4_fig9.py
 # or, for the compression-rate sweep:
-python run_sweep_fig5.py
+python ae_evaluation/run_sweep_fig5.py
 ```
 
 See [`ae_evaluation/AE_README.md`](ae_evaluation/AE_README.md) for pre-run checklist, expected outputs, and figure-to-script mapping.
@@ -93,7 +93,7 @@ WIKI_INDEX_DIR/
 
 ### 4. Configure the sweep
 
-Edit `run_sweep_fig4_fig9.py` to set the Fig. 4 / Fig. 9 sweep grid, or `run_sweep_fig5.py` for the Fig. 5 compression sweep:
+Edit `ae_evaluation/run_sweep_fig4_fig9.py` to set the Fig. 4 / Fig. 9 sweep grid, or `ae_evaluation/run_sweep_fig5.py` for the Fig. 5 compression sweep:
 
 - `gen_models` — list of HuggingFace generator model IDs
 - `ret_models` — list of `[retrieval_model_id, index_path, corpus_jsonl]` triples
@@ -105,16 +105,16 @@ Edit `run_sweep_fig4_fig9.py` to set the Fig. 4 / Fig. 9 sweep grid, or `run_swe
 
 ```bash
 # Sweep mode (groups configs by model+retriever+dataset, loads each once):
-python run_sweep_fig4_fig9.py
+python ae_evaluation/run_sweep_fig4_fig9.py
 # or, for the compression-rate sweep:
-python run_sweep_fig5.py
+python ae_evaluation/run_sweep_fig5.py
 ```
 
 Results are skipped automatically if output files already exist.
 
 ### 6. Load results
 
-Open `load_evals_executed.ipynb` in Jupyter. It reads all output files from `testingevals{OUT_SUFFIX}/` and `timingevals{OUT_SUFFIX}/` and builds three DataFrames:
+Open `ae_evaluation/load_evals_executed.ipynb` in Jupyter. It reads all output files from `testingevals{OUT_SUFFIX}/` and `timingevals{OUT_SUFFIX}/` and builds three DataFrames:
 
 - `df_results` — per-query accuracy metrics
 - `df_perf` — per-query timing and GPU performance
@@ -124,15 +124,25 @@ Config fields (model, dataset, use_rag, topk, etc.) are parsed from filenames in
 
 Update the `BASE_OUT` and `OUT_SUFFIX` variables at the top of the notebook to match your `config.py`.
 
+**Running headlessly (no notebook UI):** to execute every cell and produce the Figure 4 / 5 / 9
+reproductions (PNGs + CSVs under `ae_evaluation/figures/{plots,data}/`) without opening Jupyter:
+
+```bash
+.venv/bin/jupyter nbconvert --to notebook --execute --inplace ae_evaluation/load_evals_executed.ipynb
+```
+
+This runs all cells and saves the outputs back into the `.ipynb` in place, so reopening it later still
+shows the results. Requires `jupyter`, `pandas`, and `matplotlib` installed in `.venv` (see First-run setup).
+
 ## File overview
 
 | File | Purpose |
 |------|---------|
 | `config.py` | All configurable paths — edit this first |
 | `run_sweep.py` | Multi-config execution engine; loads fixed components once per sweep group |
-| `run_sweep_fig4_fig9.py` | Sweep orchestrator for Fig. 4 / Fig. 9 (reranking and naive runs) |
-| `run_sweep_fig5.py` | Sweep orchestrator for Fig. 5 (compression-rate sweep) |
-| `load_evals_executed.ipynb` | Loads and merges all result files into DataFrames |
+| `ae_evaluation/run_sweep_fig4_fig9.py` | Sweep orchestrator for Fig. 4 / Fig. 9 (reranking and naive runs) |
+| `ae_evaluation/run_sweep_fig5.py` | Sweep orchestrator for Fig. 5 (compression-rate sweep) |
+| `ae_evaluation/load_evals_executed.ipynb` | Loads and merges all result files into DataFrames |
 | `ae_evaluation/ae_quick.sh` | Reduced representative AE run using sweep pipeline |
 | `requirements.txt` | Python dependencies |
 | `rag_system/` | Core RAG modules (embedding, retrieval, generation, compression, reranking, timing) |

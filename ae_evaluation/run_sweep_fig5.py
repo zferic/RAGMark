@@ -7,21 +7,27 @@ Exp. 2 -- compress=True, compress_method="llmlingua2",
            top_ks=[1,3,5,10], compress_rates=[0.2,0.4,0.6,0.8],
            all 3 generators x 6 datasets.
 
-Run via: python run_sweep_fig5.py
+Run via: python ae_evaluation/run_sweep_fig5.py (from the repo root)
 """
 import subprocess
 import os
 import sys
 import json
+import time
+from datetime import timedelta
+
+# This script lives in ae_evaluation/; config.py and run_sweep.py live at the repo root.
+REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, REPO_ROOT)
 
 from config import BASE_OUT, OUT_SUFFIX, base_index_data, data_index2018, DATASET_DIR
 
-EVAL_SIZE  = 400
+EVAL_SIZE  = 100
 BATCH_SIZE = 1
 
 gen_models = [
-    "meta-llama/Meta-Llama-3-8B-Instruct",
-    "meta-llama/Llama-3.2-3B-Instruct",
+    #"meta-llama/Meta-Llama-3-8B-Instruct",
+    #"meta-llama/Llama-3.2-3B-Instruct"
     "meta-llama/Llama-3.2-1B-Instruct",
 ]
 
@@ -32,12 +38,12 @@ ret_models = [
 ]
 
 datasets = [
-    os.path.join(DATASET_DIR, "hotpotqa_dataset.jsonl"),
+    #os.path.join(DATASET_DIR, "hotpotqa_dataset.jsonl"),
     os.path.join(DATASET_DIR, "nq_dataset.jsonl"),
-    os.path.join(DATASET_DIR, "squad_dataset.jsonl"),
-    os.path.join(DATASET_DIR, "triviaqa_dataset.jsonl"),
-    os.path.join(DATASET_DIR, "popqa_dataset.jsonl"),
-    os.path.join(DATASET_DIR, "webquestions_dataset.jsonl"),
+    #os.path.join(DATASET_DIR, "squad_dataset.jsonl"),
+    #os.path.join(DATASET_DIR, "triviaqa_dataset.jsonl"),
+    #os.path.join(DATASET_DIR, "popqa_dataset.jsonl"),
+    #os.path.join(DATASET_DIR, "webquestions_dataset.jsonl"),
 ]
 
 pipelines = ["standard"]
@@ -48,9 +54,9 @@ rerank_model = "cross-encoder/ms-marco-MiniLM-L-6-v2"
 # Device config
 EMBED_DEVICE    = "cuda:0"
 GEN_DEVICE      = "cuda:0"
-INDEX_DEVICE    = "cpu"
+INDEX_DEVICE    = "cuda:0,cuda:1"
 COMPRESS_DEVICE = "cuda:0"
-RERANK_DEVICE   = "cuda:0"
+RERANK_DEVICE   = "cuda:1"
 
 # Fig. 5 sweep parameters (per appendix Exp. 2)
 top_ks           = [1, 3, 5, 10]
@@ -86,7 +92,7 @@ def run_sweep(model, ret_model, index_path, corpus_path, eval_paths, batch=False
     paths_json    = json.dumps(eval_paths)
 
     command = [
-        "python", "-u", "run_sweep.py",
+        "python", "-u", os.path.join(REPO_ROOT, "run_sweep.py"),
         "--model_path",      model,
         "--retrieval_model", ret_model,
         "--retrieval_index", index_path,
@@ -115,6 +121,7 @@ def run_sweep(model, ret_model, index_path, corpus_path, eval_paths, batch=False
     print(f"CONFIGS:  {len(sweep_configs)} per dataset")
     print("=" * 80)
 
+    sweep_start = time.time()
     try:
         process = subprocess.Popen(
             command,
@@ -133,10 +140,14 @@ def run_sweep(model, ret_model, index_path, corpus_path, eval_paths, batch=False
     except Exception as e:
         print(f"Error: {e}")
         return 1
+    finally:
+        print(f"SWEEP TIME: {timedelta(seconds=round(time.time() - sweep_start))} "
+              f"({model} / {ret_model})")
 
 # -------------------------------------------------------------------------
 # Main grid
 # -------------------------------------------------------------------------
+total_start = time.time()
 for model in gen_models:
     for ret_model, index_path, corpus_path in ret_models:
         for pipeline in pipelines:
@@ -145,3 +156,11 @@ for model in gen_models:
                                batch=batch, pipeline=pipeline)
                 if rc != 0:
                     print(f"FAILED: Sweep failed (rc={rc}) for {model} / {ret_model} / pipeline={pipeline}")
+
+total_elapsed = timedelta(seconds=round(time.time() - total_start))
+print(f"\nTOTAL SWEEP TIME: {total_elapsed}")
+
+timing_log_path = os.path.join(BASE_OUT, "fig5_total_sweep_time.txt")
+with open(timing_log_path, "w") as f:
+    f.write(f"{total_elapsed}\n")
+print(f"Wrote total sweep time to {timing_log_path}")

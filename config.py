@@ -3,7 +3,7 @@ import os
 # Local paths on the current hard drive for this workspace
 HF_HOME = "/mnt/nvme1n1p1/zman/ragmark_data/hf_home"
 
-BASE_OUT = "/mnt/nvme1n1p1/zman/ragmark_data/outputs"
+BASE_OUT = "/mnt/nvme1n1p1/zman/RAGMark/bench_raw_data"
 OUT_SUFFIX = "_local"
 
 WIKI_INDEX_DIR = "/mnt/nvme1n1p1/zman/ragmark_data/wikiindex"

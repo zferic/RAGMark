@@ -35,6 +35,10 @@ RUN source /opt/conda/etc/profile.d/conda.sh && conda activate ragmark && \
     pip install --upgrade pip setuptools wheel && \
     pip install --no-cache-dir -r requirements.txt
 
+RUN source /opt/conda/etc/profile.d/conda.sh && conda activate ragmark && \
+    conda install -y -c pytorch -c nvidia faiss-gpu=1.8.0 && \
+    conda clean -afy
+
 COPY . /app
 
 CMD ["bash"]

@@ -18,7 +18,14 @@ class TTFTRecorder(LogitsProcessor):
         return scores
 
 class Generator:
-    def __init__(self, model_path: str, device=None):
+    def __init__(self, model_path: str, device=None, gpu_ids=None):
+        """
+        device:   single device used for tensor placement / memory sampling elsewhere
+                   (e.g. "cuda:0"). Ignored for weight placement when gpu_ids shards the model.
+        gpu_ids:  optional list of GPU indices (e.g. [0, 1]) to shard the generator's weights
+                   across via device_map="auto", restricted to just these GPUs via max_memory.
+                   None or a single-element list keeps the previous single-device behavior.
+        """
         if device is None:
             device = "cuda" if torch.cuda.is_available() else "cpu"
         #self.device = torch.device(device)  # <-- normalize
@@ -41,19 +48,31 @@ class Generator:
         ).to(self.device)
         """
 
+        quantization_config = BitsAndBytesConfig(load_in_8bit=True) if "70B" in model_path else None
+
         if "70B" in model_path:
+            # Doesn't fit on a single GPU even quantized — let accelerate use every visible device.
             device_map = "auto"
-            quantization_config = BitsAndBytesConfig(load_in_8bit=True)
+            max_memory = None
+        elif gpu_ids and len(gpu_ids) > 1:
+            # Explicit multi-GPU sharding, restricted to just the requested devices.
+            device_map = "auto"
+            max_memory = {
+                gid: int(torch.cuda.get_device_properties(gid).total_memory * 0.85)
+                for gid in gpu_ids
+            }
+            print(f"[Generator] Sharding across GPUs {gpu_ids}, max_memory={max_memory}")
         else:
             device_map = {"": device}
-            quantization_config = None
+            max_memory = None
 
         self.model = AutoModelForCausalLM.from_pretrained(
             model_path,
             torch_dtype=torch.float16,
             device_map=device_map,
             token=token,
-            quantization_config=quantization_config
+            quantization_config=quantization_config,
+            max_memory=max_memory,
         )
 
         devices = set(p.device for p in self.model.parameters())

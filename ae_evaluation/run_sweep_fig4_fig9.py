@@ -10,12 +10,18 @@ Both experiments share the same model/dataset/top-k grid and are produced
 by a single sweep pass: the naive configs (rerank=False) feed Fig. 9,
 and the reranked configs (rerank=True) feed Fig. 4.
 
-Run via: python run_sweep_fig4_fig9.py
+Run via: python ae_evaluation/run_sweep_fig4_fig9.py (from the repo root)
 """
 import subprocess
 import os
 import sys
 import json
+import time
+from datetime import timedelta
+
+# This script lives in ae_evaluation/; config.py and run_sweep.py live at the repo root.
+REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, REPO_ROOT)
 
 # -------------------------------------------------------------------------
 # Config
@@ -26,8 +32,8 @@ EVAL_SIZE  = 100
 BATCH_SIZE = 1
 
 gen_models = [
-    "meta-llama/Meta-Llama-3-8B-Instruct",
-    "meta-llama/Llama-3.2-3B-Instruct",
+    #"meta-llama/Meta-Llama-3-8B-Instruct",
+    #"meta-llama/Llama-3.2-3B-Instruct"
     "meta-llama/Llama-3.2-1B-Instruct",
 ]
 
@@ -82,9 +88,9 @@ rerank_models  = ["cross-encoder/ms-marco-MiniLM-L-6-v2"]
 # Device config
 EMBED_DEVICE    = "cuda:0"
 GEN_DEVICE      = "cuda:0"
-INDEX_DEVICE    = "cpu"
+INDEX_DEVICE    = "cuda:0,cuda:1"
 COMPRESS_DEVICE = "cuda:0"
-RERANK_DEVICE   = "cuda:0"
+RERANK_DEVICE   = "cuda:1"
 
 # Inner sweep parameters
 # Fig. 4 / Fig. 9: top_ks=[0,1,3,5,10], no compression
@@ -137,7 +143,7 @@ def run_sweep(model, ret_model, index_path, corpus_path, eval_paths, batch=True,
     paths_json    = json.dumps(eval_paths)
 
     command = [
-        "python", "-u", "run_sweep.py",
+        "python", "-u", os.path.join(REPO_ROOT, "run_sweep.py"),
         "--model_path",      model,
         "--retrieval_model", ret_model,
         "--retrieval_index", index_path,
@@ -168,6 +174,7 @@ def run_sweep(model, ret_model, index_path, corpus_path, eval_paths, batch=True,
     print(f"CONFIGS:  {len(sweep_configs)} per dataset")
     print("=" * 80)
 
+    sweep_start = time.time()
     try:
         process = subprocess.Popen(
             command,
@@ -186,10 +193,14 @@ def run_sweep(model, ret_model, index_path, corpus_path, eval_paths, batch=True,
     except Exception as e:
         print(f"Error: {e}")
         return 1
+    finally:
+        print(f"SWEEP TIME: {timedelta(seconds=round(time.time() - sweep_start))} "
+              f"({model} / {ret_model} / rerank={rerank})")
 
 # -------------------------------------------------------------------------
 # Main grid — one subprocess per (model × ret_model), all datasets inside
 # -------------------------------------------------------------------------
+total_start = time.time()
 for model in gen_models:
     for ret_model, index_path, corpus_path in ret_models:
         for pipeline in pipelines:
@@ -203,3 +214,11 @@ for model in gen_models:
                             if rc != 0:
                                 print(f"FAILED: Sweep failed (rc={rc}) for {model} / {ret_model} / "
                                       f"pipeline={pipeline} / batch={batch} / rerank={rerank} / {rerank_model}")
+
+total_elapsed = timedelta(seconds=round(time.time() - total_start))
+print(f"\nTOTAL SWEEP TIME: {total_elapsed}")
+
+timing_log_path = os.path.join(BASE_OUT, "fig4_fig9_total_sweep_time.txt")
+with open(timing_log_path, "w") as f:
+    f.write(f"{total_elapsed}\n")
+print(f"Wrote total sweep time to {timing_log_path}")

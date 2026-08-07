@@ -87,6 +87,8 @@ class Retriever:
     # Single query
     # -------------------------------------------------------------------------
     def retrieve(self, query_embedding, k=5):
+        if k <= 0:
+            return []
         query_np = self.to_faiss(query_embedding)
         D, I = self.index.search(query_np, k)
         n = len(self.texts)
@@ -97,6 +99,8 @@ class Retriever:
     # -------------------------------------------------------------------------
     def batch_retrieve(self, embeddings, k=5):
         emb_np = self.to_faiss(embeddings)
+        if k <= 0:
+            return [[] for _ in range(emb_np.shape[0])]
         D, I = self.index.search(emb_np, k)
         n = len(self.texts)
         return [[self.texts[j] for j in row if 0 <= j < n] for row in I]

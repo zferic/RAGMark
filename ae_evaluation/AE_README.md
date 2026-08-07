@@ -66,9 +66,9 @@ Per configuration, the artifact writes:
 Primary experiment paths used for paper-scale benchmarking:
 
 ```bash
-python run_sweep_fig4_fig9.py
+python ae_evaluation/run_sweep_fig4_fig9.py
 # or, for the compression-rate sweep:
-python run_sweep_fig5.py
+python ae_evaluation/run_sweep_fig5.py
 ```
 
 Notes:
@@ -101,7 +101,7 @@ Figure-specific analysis mapping:
 
 Approximate expectations on a prepared GPU machine:
 - Quick check (`bash ae_evaluation/ae_quick.sh`): usually minutes.
-- Full sweep (`python run_sweep_fig4_fig9.py` or `python run_sweep_fig5.py` with multiple models/datasets): hours.
+- Full sweep (`python ae_evaluation/run_sweep_fig4_fig9.py` or `python ae_evaluation/run_sweep_fig5.py` with multiple models/datasets): hours.
 
 Runtime variability is expected based on model size, GPU type, and index placement (CPU vs GPU).
 

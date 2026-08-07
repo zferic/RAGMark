@@ -91,7 +91,6 @@ def parse_device(s):
 
 EMBED_DEVICE    = parse_device(args.embed_device)
 COMPRESS_DEVICE = parse_device(args.compress_device)
-GEN_DEVICE      = parse_device(args.gen_device)
 RERANK_DEVICE   = parse_device(args.rerank_device)
 
 _index_parts = [s.strip() for s in args.index_device.split(",")]
@@ -101,6 +100,18 @@ if _index_parts == ["cpu"]:
 else:
     INDEX_GPU_IDS = [torch.device(p).index or 0 for p in _index_parts]
     INDEX_DEVICE  = torch.device(_index_parts[0])
+
+# --gen_device accepts a comma-separated GPU list (e.g. "cuda:0,cuda:1") to shard the generator
+# across multiple GPUs via device_map="auto", same convention as --index_device for FAISS sharding.
+# GEN_DEVICE stays the single primary device used for tensor placement / memory sampling elsewhere;
+# GEN_GPU_IDS is the full list, only consumed by Generator() when sharding.
+_gen_parts = [s.strip() for s in args.gen_device.split(",")]
+if _gen_parts == ["cpu"]:
+    GEN_DEVICE  = torch.device("cpu")
+    GEN_GPU_IDS = [-1]
+else:
+    GEN_GPU_IDS = [torch.device(p).index or 0 for p in _gen_parts]
+    GEN_DEVICE  = torch.device(_gen_parts[0])
 
 # -------------------------------------------------------------------------
 # Filename helpers
@@ -116,6 +127,7 @@ def device_tag():
     full = (f"dev_embed={EMBED_DEVICE}_index={INDEX_DEVICE}"
             f"_indexgpu={'-'.join(str(i) for i in INDEX_GPU_IDS)}"
             f"_compress={COMPRESS_DEVICE}_gen={GEN_DEVICE}"
+            f"_gengpu={'-'.join(str(i) for i in GEN_GPU_IDS)}"
             f"_rerank={RERANK_DEVICE}")
     return "dev" + hashlib.md5(_safe(full).encode()).hexdigest()[:6]
 
@@ -235,7 +247,8 @@ if need_rag:
 # Generator
 print("Loading generator...")
 init_timing.capture_cpu_memory("load_generator_cpu_before")
-generator = Generator(args.model_path, device=GEN_DEVICE)
+generator = Generator(args.model_path, device=GEN_DEVICE,
+                       gpu_ids=None if GEN_GPU_IDS == [-1] else GEN_GPU_IDS)
 init_timing.capture_cpu_memory("load_generator_cpu_after")
 init_timing.capture_gpu_memory("load_generator_gpu_after", GEN_DEVICE)
 init_timing.data["generator_device"] = str(GEN_DEVICE)
