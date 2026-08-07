@@ -35,20 +35,25 @@ To reproduce the figures in our paper, we provide access to a remote execution e
 \subsection{Description}
 
 \subsubsection{How to access}
-\url{https://github.com/zferic/RAGMark}, archived at DOI: [FILL IN].
-[NOTE: repo currently private — must be public by submission, per the paper's own open-source commitment.]
+\url{https://github.com/zferic/RAGMark}, archived at DOI: [FILL IN once uploaded to
+Zenodo/Figshare].
+[NOTE: repo currently private — must be made public before submission so reviewers can
+access it directly. IISWC's AE process is single-blind (reviewers see author identity),
+so no anonymization is required on our end; see the SSH note below for how reviewer
+anonymity is handled instead.]
 
 \subsubsection{Hardware dependencies}
+NVIDIA GPU is recommended, with hardware sized to the configuration being evaluated
+(e.g., larger models/datasets, terabyte-scale databases, or CPU retrieval from SSD may
+need multi-GPU); the framework is otherwise hardware-agnostic (NVIDIA or CPU).
+Multi-GPU is also needed for the GPU0/GPU1 placement study (Sections 4.7-4.8).
+
 Paper results were measured on 2$\times$ NVIDIA A100-SXM4-40GB GPUs, which the
 university cannot provide remote access to. We instead provide 2$\times$ NVIDIA
 V100-PCIE-16GB GPUs — an older, lower-memory generation. Absolute numbers (latency,
 energy, memory) will not match the paper here, though they are reproducible on
 matching hardware. We believe this also showcases RAGMark's portability across
 hardware, and the impact both RAG configuration and hardware platform have on results.
-
-NVIDIA GPU is recommended; the framework is otherwise hardware-agnostic (NVIDIA or
-CPU). Multi-GPU is needed for the GPU0/GPU1 study (Sections 4.7-4.8); single-GPU/CPU
-still reproduces accuracy and some performance results.
 
 \subsubsection{Software dependencies}
 
@@ -82,7 +87,10 @@ conda install -c pytorch -c nvidia faiss-gpu=1.8.0   # or faiss-cpu
 # and FlashRAG eval JSONL files under DATASET_DIR
 \end{verbatim}
 
-To simplify the evaluation process, we have prepared a remote execution environment reachable via SSH, requiring only a single script to be run.
+To simplify the evaluation process, we have prepared a remote execution environment
+reachable via SSH, requiring only a single script to be run. Login credentials for a
+shared reviewer account will be provided via HotCRP during the AE period, so reviewers
+are not required to register using their own name, email, or institutional account.
 
 \begin{verbatim}
 ssh <username>@129.10.225.5
