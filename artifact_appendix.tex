@@ -1,28 +1,25 @@
-\appendix
+\newpage
 \section{Artifact Appendix}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Abstract}
 
-RAGMark is a modular benchmarking framework for Retrieval-Augmented
-Generation (RAG) systems. It decomposes end-to-end RAG execution into
-per-query, per-stage measurements (embedding, FAISS retrieval, reranking,
-compression, generation) capturing latency, TTFT/decode time, GPU/CPU
-power and energy, SM utilization, memory bandwidth, and PCIe transfer,
-alongside accuracy metrics (EM, F1, ROUGE-L, retrieval recall). This
-artifact reproduces the five characterization cases in the paper (naive,
-reranking, compression, combined, iterative) across three Llama-3.2/3
-generators, three e5 embedding models, and six open-domain QA datasets
-over a Wikipedia-2018 FAISS index.
+RAGMark is a hardware benchmarking framework for advanced Retrieval-Augmented Generation (RAG) pipelines.
+
+This appendix describes how to access our code artifact and install it on any supported hardware.
+
+To reproduce the figures in our paper, we provide access to a remote execution environment that allows reviewers to run the benchmark and generate data and three figures from our paper: Case 1 (naive, Fig.~9), Case 2 (reranking, Fig.~4), and Case 3 (compression, Fig.~5). The remote machine uses different GPUs than those used in our paper evaluation (V100-16GB vs. our A100-40GB); however, we believe this also demonstrates the portability of the benchmark, and the significant impact that both the RAG configuration and the underlying hardware platform have on the final results.
+
+
+
 
 \subsection{Artifact check-list (meta-information)}
 
 {\small
 \begin{itemize}
-  \item {\bf Program: } Dense-retrieval RAG (embed $\to$ FAISS search $\to$ optional rerank/compression $\to$ LLM generation), plus an iterative variant.
-  \item {\bf Data set: } NQ, TriviaQA, SQuAD, WebQuestions, PopQA, HotpotQA (via FlashRAG); Wikipedia 2018 dump as retrieval corpus ($\sim$9.2M passages).
-  \item {\bf Hardware: } NVIDIA GPU (paper results: 2$\times$ A100-SXM4-40GB); CPU/single-GPU subsets also supported.
-  \item {\bf Metrics: } Accuracy (EM, F1, ROUGE-L, retrieval recall); performance (latency, TTFT, throughput, GPU power/energy, utilization).
+  \item {\bf Program: } Advanced dense-retrieval RAG benchmarking tool supporting a wide range of configurations (embed, FAISS search, optional rerank/compression, LLM generation), and both standard and iterative pipelines.
+  \item {\bf Hardware: } NVIDIA GPU. Paper results: 2$\times$ A100-SXM4-40GB. Artifact evaluation machine: 2$\times$ V100-PCIE-16GB. CPU/single-GPU subsets also supported.
+  \item {\bf Metrics: } RAG Accuracy: (EM, F1, ROUGE-L, retrieval recall); Hardware performance (latency, TTFT, throughput, GPU power/energy, utilization).
   \item {\bf Output: } Per-query CSV/JSONL (accuracy, timing, energy, traces).
   \item {\bf Experiments: } Three reproducible experiments corresponding to paper figures: (1) reranking latency/accuracy (Fig.~4), (2) compression-rate latency (Fig.~5), (3) TTFT-vs-ROUGE trade-off (Fig.~9).
   \item {\bf How much disk space required (approximately)?: } $\sim$50--70GB (Wikipedia corpus + one FAISS index + generator weights).
@@ -42,30 +39,37 @@ over a Wikipedia-2018 FAISS index.
 [NOTE: repo currently private — must be public by submission, per the paper's own open-source commitment.]
 
 \subsubsection{Hardware dependencies}
-NVIDIA GPU recommended; multi-GPU only needed to reproduce the exact
-GPU0/GPU1 placement study in Section 4.7/4.8. Single-GPU or CPU-only
-reproduces the accuracy results and a subset of the performance results.
+Paper results were measured on 2$\times$ NVIDIA A100-SXM4-40GB GPUs; the artifact
+evaluation machine instead provides 2$\times$ NVIDIA V100-PCIE-16GB GPUs. An NVIDIA GPU
+is recommended in general, and the framework is otherwise hardware-agnostic across
+NVIDIA devices and CPU-only platforms, following our installation guide. Multi-GPU is
+required to reproduce the exact GPU0/GPU1 placement study in Sections 4.7 and 4.8.
+Single-GPU or CPU-only conditions reproduce the accuracy results and a subset of the
+performance results.
 
 \subsubsection{Software dependencies}
-Python $\geq$3.10, pinned in \texttt{requirements.txt} (PyTorch 2.6, transformers 4.49, sentence-transformers 3.4, llmlingua 0.2.2, accelerate, bitsandbytes, pynvml, psutil). FAISS via conda (\texttt{faiss-gpu=1.8.0} or \texttt{faiss-cpu}).
+
+In our execution environment, all software dependencies necessary for operation are fully satisfied. Additionally, for AE evaluation, we use docker, but it is not a requirement outside of this ae environment prepared. All other dependencies are listed in requirements.txt and in the README.
 
 \subsubsection{Data sets}
-Wikipedia 2018 dump, preprocessed with FlashRAG (512-word soft chunk limit) into $\sim$9.2M passages; six QA eval sets via FlashRAG. [FILL IN concrete reviewer-facing download steps — current README assumes paths are pre-populated.]
+Retrieval Corpus: Wikipedia 2018 dump as retrieval corpus ($\sim$9.2M passages).
+Evaluation QA Data: NQ, TriviaQA, SQuAD, WebQuestions, PopQA, HotpotQA (via FlashRAG). To recreate these datasets from scratch, we recommend using the FlashRAG toolkit at \url{https://github.com/RUC-NLPIR/FlashRAG} or your own.
 
 \subsubsection{Models}
-Gated on HuggingFace Hub — reviewers need an HF token with Meta license acceptance for all three Llama generators.
+Supports any decoder model hosted on HuggingFace Hub — a HF token with LLM license acceptance is required (we configure this automatically in the execution environment for artifact evaluation.)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Installation}
+To install RAGMark from scratch on a new system, follow these steps:
 \begin{verbatim}
 git clone https://github.com/zferic/RAGMark.git
 cd RAGMark
 
-python -m venv venv
-source venv/bin/activate
+python -m venv .venv
+source .venv/bin/activate
 
 pip install -r requirements.txt
-conda install -c pytorch faiss-gpu=1.8.0   # or faiss-cpu
+conda install -c pytorch -c nvidia faiss-gpu=1.8.0   # or faiss-cpu
 
 # edit config.py: HF_HOME, BASE_OUT,
 # WIKI_INDEX_DIR, WIKI_CORPUS_2018, DATASET_DIR
@@ -75,10 +79,20 @@ conda install -c pytorch faiss-gpu=1.8.0   # or faiss-cpu
 # and FlashRAG eval JSONL files under DATASET_DIR
 \end{verbatim}
 
+To simplify the evaluation process, we have prepared a remote execution environment reachable via SSH, requiring only a single script to be run.
+
+\begin{verbatim}
+ssh <username>@129.10.225.5
+cd RAGMark
+bash ae_evaluation/ae_eval.sh
+\end{verbatim}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Experiment workflow}
-Each experiment is a sweep config in \texttt{run\_sweep\_configs.py},
-run via \texttt{python run\_sweep\_fig4\_fig9.py} for Fig.~4 / Fig.~9, and \texttt{python run\_sweep\_fig5.py} for Fig.~5:
+
+For this evaluation, we provide \texttt{ae\_evaluation/ae\_eval.sh} to load the Docker environment and directly produce the results end-to-end.
+
+The script runs two sweep scripts followed by our analysis notebook (executed headlessly), which renders the figures below directly to \texttt{ae\_evaluation/figures/}:
 
 \begin{itemize}
   \item {\bf Exp. 1 (Fig.~4, reranking): } \texttt{rerank=True}, \texttt{top\_ks=[0,1,3,5,10]}, all 3 generators $\times$ 6 datasets.
@@ -86,16 +100,16 @@ run via \texttt{python run\_sweep\_fig4\_fig9.py} for Fig.~4 / Fig.~9, and \text
   \item {\bf Exp. 3 (Fig.~9, trade-off): } naive pipeline (\texttt{rerank=False}, \texttt{compress=False}), \texttt{top\_ks=[0,1,3,5,10]}, all 3 generators.
 \end{itemize}
 
-Existing outputs are skipped, so interrupted sweeps resume cleanly.
+Please note that RAG configuration support depends on the hardware support. A particular RAG configuration (e.g. 10 retrieved documents or a large LLM) may require substantially more compute than is available. Therefore, not all results that we ran on the A100 can be reproduced in the artifact evaluation V100 execution environment. 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Evaluation and expected results}
-\texttt{load\_evals\_executed.ipynb} loads all output files into
+\texttt{ae\_evaluation/load\_evals\_executed.ipynb} loads all output files into
 \texttt{df\_results}/\texttt{df\_perf}/\texttt{df\_trace}.
 
 \begin{itemize}
-  \item {\bf Fig.~4: } \texttt{df\_perf} (stage latencies: embed, FAISS, rerank, TTFT, decode) merged with \texttt{df\_results} (ROUGE-L), grouped by dataset $\times$ model $\times$ top-$k$.
-  \item {\bf Fig.~5: } \texttt{df\_perf} filtered to the compression sweep, grouped by top-$k$ $\times$ compression rate $r$, plotting TTFT/decode/compress/FAISS/embed latency.
+  \item {\bf Fig.~4: } \texttt{df\_perf} stage latencies (embed, FAISS, TTFT, decode) plus rerank duration recovered from \texttt{df\_trace}, merged with \texttt{df\_results} (ROUGE-L), grouped by dataset $\times$ model $\times$ top-$k$.
+  \item {\bf Fig.~5: } \texttt{df\_perf} stage latencies (embed, FAISS, TTFT, decode) plus compression duration recovered from \texttt{df\_trace}, filtered to the compression sweep and grouped by top-$k$ $\times$ compression rate $r$.
   \item {\bf Fig.~9: } \texttt{df\_results} (ROUGE-L) merged with \texttt{df\_perf} (TTFT, decode, memory, SM\%), grouped by model $\times$ top-$k$, naive pipeline only.
 \end{itemize}
 
