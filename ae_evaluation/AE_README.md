@@ -10,7 +10,8 @@ RAGMark reproduces the paper's five characterization cases: naive, reranking, co
 > several of the figures and datasets, and the methodology behind them — not the paper's exact
 > reported values. Those can, however, be easily reproduced on a machine matching the
 > specifications in the paper. We believe this also showcases the portability of RAGMark across
-> hardware.
+> hardware, and the significant impact that both the RAG configuration and the underlying hardware
+> platform have on the final results.
 
 ## 1. Access
 
