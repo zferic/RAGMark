@@ -6,9 +6,11 @@ RAGMark reproduces the paper's five characterization cases: naive, reranking, co
 > GPUs, which the university is unable to provide remote access to for artifact evaluation. We
 > therefore provide this evaluation machine instead, equipped with two NVIDIA V100-PCIE-16GB
 > GPUs — an older generation with less memory per device. Absolute numbers (latency, energy,
-> memory) will not match the paper on this older-generation hardware — this artifact reproduces
-> the figures and the methodology behind them, not the paper's exact reported values. We believe
-> this also showcases the portability of RAGMark across hardware.
+> memory) will not match the paper on this older-generation hardware. This artifact reproduces
+> several of the figures and datasets, and the methodology behind them — not the paper's exact
+> reported values. Those can, however, be easily reproduced on a machine matching the
+> specifications in the paper. We believe this also showcases the portability of RAGMark across
+> hardware.
 
 ## 1. Access
 
