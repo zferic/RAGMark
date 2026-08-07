@@ -3,10 +3,11 @@
 RAGMark reproduces the paper's five characterization cases: naive, reranking, compression, combined, and iterative.
 
 > **Note on hardware:** the paper's results (Section 4.1) were measured on two NVIDIA A100-SXM4-40GB
-> GPUs. This evaluation machine has two NVIDIA V100-PCIE-16GB GPUs instead. Absolute numbers
-> (latency, energy, memory) will not match the paper on this weaker/lower-memory hardware — this
-> artifact reproduces the figures and the methodology behind them, not the paper's exact reported
-> values.
+> GPUs. This evaluation machine has two NVIDIA V100-PCIE-16GB GPUs instead — an older generation
+> with less memory per device. Absolute numbers (latency, energy, memory) will not match the paper
+> on this older-generation hardware — this artifact reproduces the figures and the methodology
+> behind them, not the paper's exact reported values. We believe this also showcases the
+> portability of RAGMark across hardware.
 
 ## 1. Access
 
