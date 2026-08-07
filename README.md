@@ -39,7 +39,7 @@ python ae_evaluation/run_sweep_fig4_fig9.py
 python ae_evaluation/run_sweep_fig5.py
 ```
 
-See [`ae_evaluation/AE_README.md`](ae_evaluation/AE_README.md) for pre-run checklist, expected outputs, and figure-to-script mapping.
+See [`ae_evaluation/AE_README.md`](ae_evaluation/AE_README.md) for reviewer access and where results land.
 
 ## First-run setup
 
