@@ -27,13 +27,13 @@ A benchmarking pipeline for Retrieval-Augmented Generation (RAG) systems. Runs a
 
 ## Artifact Evaluation (IISWC 2026)
 
-For reviewers: all AE documentation, experiment definitions, and the quick-run script are in [`ae_evaluation/`](ae_evaluation/).
+For reviewers: all AE documentation, experiment definitions, and the end-to-end runner are in [`ae_evaluation/`](ae_evaluation/).
 
 ```bash
-# Verify the full pipeline end-to-end (small representative run, ~minutes):
-bash ae_evaluation/ae_quick.sh
+# Run both sweeps + the analysis notebook end-to-end via Docker:
+bash ae_evaluation/ae_eval.sh
 
-# Full paper experiments:
+# Or run either sweep individually:
 python ae_evaluation/run_sweep_fig4_fig9.py
 # or, for the compression-rate sweep:
 python ae_evaluation/run_sweep_fig5.py
@@ -143,6 +143,6 @@ shows the results. Requires `jupyter`, `pandas`, and `matplotlib` installed in `
 | `ae_evaluation/run_sweep_fig4_fig9.py` | Sweep orchestrator for Fig. 4 / Fig. 9 (reranking and naive runs) |
 | `ae_evaluation/run_sweep_fig5.py` | Sweep orchestrator for Fig. 5 (compression-rate sweep) |
 | `ae_evaluation/load_evals_executed.ipynb` | Loads and merges all result files into DataFrames |
-| `ae_evaluation/ae_quick.sh` | Reduced representative AE run using sweep pipeline |
+| `ae_evaluation/ae_eval.sh` | Runs both sweeps + the analysis notebook end-to-end via Docker |
 | `requirements.txt` | Python dependencies |
 | `rag_system/` | Core RAG modules (embedding, retrieval, generation, compression, reranking, timing) |
