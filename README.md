@@ -8,7 +8,7 @@ An experimental benchmark for Retrieval-Augmented Generation (RAG) systems acros
 > **IISWC 2026 artifact.** This repository accompanies our IISWC 2026 paper and received the
 > Available, Functional, and Reproduced badges. The evaluated version is archived at
 > [doi.org/10.5281/zenodo.22058207](https://doi.org/10.5281/zenodo.22058207). To reproduce the
-> paper's figures, see [`ae_evaluation/`](ae_evaluation/AE_README.md).
+> paper's figures, see [`ae_evaluation/`](ae_evaluation/).
 
 ## Features
 
