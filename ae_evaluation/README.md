@@ -2,7 +2,7 @@
 
 RAGMark reproduces the paper's five characterization cases: naive, reranking, compression, combined, and iterative.
 
-This artifact received the Available, Functional, and Reproduced badges. The evaluated version is
+This artifact received the Available, Reviewed, and Reproducible badges. The evaluated version is
 archived at [doi.org/10.5281/zenodo.22058207](https://doi.org/10.5281/zenodo.22058207); `main` may
 have changed since.
 
