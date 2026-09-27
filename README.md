@@ -1,6 +1,7 @@
 # RAGMark
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22058207.svg)](https://doi.org/10.5281/zenodo.22058207)
 
 An experimental benchmark for Retrieval-Augmented Generation (RAG) systems across models, datasets, retrieval indexes, pipelines, and compression settings, recording accuracy and performance traces per query.
 
@@ -29,7 +30,12 @@ This table reflects what the paper's experiments cover, not a hard limit — the
 
 ## Artifact Evaluation (IISWC 2026)
 
-For reviewers: all AE documentation, experiment definitions, and the end-to-end runner are in [`ae_evaluation/`](ae_evaluation/).
+The artifact-evaluated version is archived on Zenodo at [doi.org/10.5281/zenodo.22058207](https://doi.org/10.5281/zenodo.22058207); `main` may have changed since.
+
+All AE documentation, experiment definitions, and the end-to-end runner are in [`ae_evaluation/`](ae_evaluation/).
+
+- **Time:** ~1 hour for all AE experiments and figures
+- **Disk:** ~65 GB for data and code (FAISS index, cached model weights, and the Wikipedia corpus dominate), plus ~10 GB for the Docker image
 
 ```bash
 # Run both sweeps + the analysis notebook end-to-end via Docker:
