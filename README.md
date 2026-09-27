@@ -5,6 +5,11 @@
 
 An experimental benchmark for Retrieval-Augmented Generation (RAG) systems across models, datasets, retrieval indexes, pipelines, and compression settings, recording accuracy and performance traces per query.
 
+> **IISWC 2026 artifact.** This repository accompanies our IISWC 2026 paper and received the
+> Available, Functional, and Reproduced badges. The evaluated version is archived at
+> [doi.org/10.5281/zenodo.22058207](https://doi.org/10.5281/zenodo.22058207). To reproduce the
+> paper's figures, see [`ae_evaluation/`](ae_evaluation/AE_README.md).
+
 ## Features
 
 - Per-query, per-stage profiling: embedding, FAISS retrieval, reranking, compression, generation
@@ -27,27 +32,6 @@ An experimental benchmark for Retrieval-Augmented Generation (RAG) systems acros
 | **Retrieval corpus** | Wikipedia 2018 dump (~9.2M passages) |
 
 This table reflects what the paper's experiments cover, not a hard limit — the framework is built around standard Hugging Face interfaces, so swapping in pretty much any other Hugging Face generator, embedder, reranker, or dataset is a config change, not a code change.
-
-## Artifact Evaluation (IISWC 2026)
-
-The artifact-evaluated version is archived on Zenodo at [doi.org/10.5281/zenodo.22058207](https://doi.org/10.5281/zenodo.22058207); `main` may have changed since.
-
-All AE documentation, experiment definitions, and the end-to-end runner are in [`ae_evaluation/`](ae_evaluation/).
-
-- **Time:** ~1 hour for all AE experiments and figures
-- **Disk:** ~65 GB for data and code (FAISS index, cached model weights, and the Wikipedia corpus dominate), plus ~10 GB for the Docker image
-
-```bash
-# Run both sweeps + the analysis notebook end-to-end via Docker:
-bash ae_evaluation/ae_eval.sh
-
-# Or run either sweep individually:
-python ae_evaluation/run_sweep_fig4_fig9.py
-# or, for the compression-rate sweep:
-python ae_evaluation/run_sweep_fig5.py
-```
-
-See [`ae_evaluation/AE_README.md`](ae_evaluation/AE_README.md) for reviewer access and where results land.
 
 ## First-run setup
 
@@ -105,9 +89,9 @@ WIKI_INDEX_DIR/
 (`--sweep_configs`) plus model/retriever/device args, evaluates each one, and writes results,
 grouping runs by model+retriever+dataset so fixed components load only once. In practice you
 drive it via a small orchestrator script that builds that JSON and invokes `run_sweep.py` as a
-subprocess. `ae_evaluation/run_sweep_fig4_fig9.py` and `ae_evaluation/run_sweep_fig5.py` (example
-configurations, wired up for this paper's own experiments) are a good starting point to copy and
-adapt:
+subprocess. The example sweep scripts `ae_evaluation/run_sweep_fig4_fig9.py` and
+`ae_evaluation/run_sweep_fig5.py` (the paper's own experiments) are a good starting point to copy
+and adapt:
 
 - `gen_models` — list of HuggingFace generator model IDs
 - `ret_models` — list of `[retrieval_model_id, index_path, corpus_jsonl]` triples
@@ -123,7 +107,7 @@ python your_sweep_script.py   # e.g. a copy of one of the example configurations
 
 Results are skipped automatically if output files already exist.
 
-### 6. Load results
+### 6. Load and plot results
 
 Open `ae_evaluation/load_evals_executed.ipynb` in Jupyter. It reads all output files from `testingevals{OUT_SUFFIX}/` and `timingevals{OUT_SUFFIX}/` and builds three DataFrames:
 
@@ -133,17 +117,9 @@ Open `ae_evaluation/load_evals_executed.ipynb` in Jupyter. It reads all output f
 
 Config fields (model, dataset, use_rag, topk, etc.) are parsed from filenames into columns automatically.
 
-Update the `BASE_OUT` and `OUT_SUFFIX` variables at the top of the notebook to match your `config.py`.
-
-**Running headlessly (no notebook UI):** to execute every cell and produce the Figure 4 / 5 / 9
-reproductions (PNGs + CSVs under `ae_evaluation/figures/{plots,data}/`) without opening Jupyter:
-
-```bash
-.venv/bin/jupyter nbconvert --to notebook --execute --inplace ae_evaluation/load_evals_executed.ipynb
-```
-
-This runs all cells and saves the outputs back into the `.ipynb` in place, so reopening it later still
-shows the results. Requires `jupyter`, `pandas`, and `matplotlib` installed in `.venv` (see First-run setup).
+Update the paths in the notebook's first cell (`BASE`, `TESTING_DIR`, `TIMING_DIR`, `AE_EVAL_DIR`)
+to match your `config.py`. The later cells plot the paper's Figures 4, 5 and 9 from whatever
+results are present.
 
 ## High Level Repository Overview
 
