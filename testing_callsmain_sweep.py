@@ -19,7 +19,7 @@ EVAL_SIZE  = 100
 BATCH_SIZE = 1
 
 gen_models = [
-    "meta-llama/Meta-Llama-3-8B-Instruct",
+    #"meta-llama/Meta-Llama-3-8B-Instruct",
     "meta-llama/Llama-3.2-3B-Instruct",
     "meta-llama/Llama-3.2-1B-Instruct",
 ]
@@ -73,7 +73,7 @@ rerank_models  = ["cross-encoder/ms-marco-MiniLM-L-6-v2"]
 # Device config
 EMBED_DEVICE    = "cuda:0"
 GEN_DEVICE      = "cuda:0"
-INDEX_DEVICE    = "cuda:0,cuda:1"   # change to "cpu" for hardware placement run
+INDEX_DEVICE    = "cuda:0"   # change to "cpu" for hardware placement run
 #INDEX_DEVICE    = "cuda:0"   # change to "cpu" for hardware placement run
 INDEX_DEVICE    = "cpu"   # change to "cpu" for hardware placement run
 
@@ -81,12 +81,12 @@ COMPRESS_DEVICE = "cuda:0"
 RERANK_DEVICE   = "cuda:0"
 
 # Inner sweep parameters
-userags          = [False]
-compresss        = [False]
+userags          = [False, True]
+compresss        = [True]
 compress_methods = ["llmlingua2", "sc"]   # longllmlingua excluded
 compress_rates   = [.25, 0.5, .75]
-top_ks           = [1, 3, 5, 10]
-batches          = [False]
+top_ks           = [1,3,5,10]
+batches          = [False, True]
 
 env = os.environ.copy()
 env["PYTHONUNBUFFERED"] = "1"

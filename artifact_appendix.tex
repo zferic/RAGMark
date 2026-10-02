@@ -1,0 +1,109 @@
+\appendix
+\section{Artifact Appendix}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Abstract}
+
+RAGMark is a modular benchmarking framework for Retrieval-Augmented
+Generation (RAG) systems. It decomposes end-to-end RAG execution into
+per-query, per-stage measurements (embedding, FAISS retrieval, reranking,
+compression, generation) capturing latency, TTFT/decode time, GPU/CPU
+power and energy, SM utilization, memory bandwidth, and PCIe transfer,
+alongside accuracy metrics (EM, F1, ROUGE-L, retrieval recall). This
+artifact reproduces the five characterization cases in the paper (naive,
+reranking, compression, combined, iterative) across three Llama-3.2/3
+generators, three e5 embedding models, and six open-domain QA datasets
+over a Wikipedia-2018 FAISS index.
+
+\subsection{Artifact check-list (meta-information)}
+
+{\small
+\begin{itemize}
+  \item {\bf Program: } Dense-retrieval RAG (embed $\to$ FAISS search $\to$ optional rerank/compression $\to$ LLM generation), plus an iterative variant.
+  \item {\bf Data set: } NQ, TriviaQA, SQuAD, WebQuestions, PopQA, HotpotQA (via FlashRAG); Wikipedia 2018 dump as retrieval corpus ($\sim$9.2M passages).
+  \item {\bf Hardware: } NVIDIA GPU (paper results: 2$\times$ A100-SXM4-40GB); CPU/single-GPU subsets also supported.
+  \item {\bf Metrics: } Accuracy (EM, F1, ROUGE-L, retrieval recall); performance (latency, TTFT, throughput, GPU power/energy, utilization).
+  \item {\bf Output: } Per-query CSV/JSONL (accuracy, timing, energy, traces).
+  \item {\bf Experiments: } Three reproducible experiments corresponding to paper figures: (1) reranking latency/accuracy (Fig.~4), (2) compression-rate latency (Fig.~5), (3) TTFT-vs-ROUGE trade-off (Fig.~9).
+  \item {\bf How much disk space required (approximately)?: } $\sim$50--70GB (Wikipedia corpus + one FAISS index + generator weights).
+  \item {\bf Publicly available?: } Yes.
+  \item {\bf Code licenses (if publicly available)?: } MIT.
+  \item {\bf Data licenses (if publicly available)?: } Wikipedia: CC BY-SA 3.0/GFDL; QA datasets via FlashRAG under original licenses.
+  \item {\bf Archived (provide DOI)?: } [FILL IN once uploaded to Zenodo/Figshare]
+\end{itemize}
+}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Description}
+
+\subsubsection{How to access}
+\url{https://github.com/zferic/RAGMark}, archived at DOI: [FILL IN].
+[NOTE: repo currently private — must be public by submission, per the paper's own open-source commitment.]
+
+\subsubsection{Hardware dependencies}
+NVIDIA GPU recommended; multi-GPU only needed to reproduce the exact
+GPU0/GPU1 placement study in Section 4.7/4.8. Single-GPU or CPU-only
+reproduces the accuracy results and a subset of the performance results.
+
+\subsubsection{Software dependencies}
+Python $\geq$3.10, pinned in \texttt{requirements.txt} (PyTorch 2.6, transformers 4.49, sentence-transformers 3.4, llmlingua 0.2.2, accelerate, bitsandbytes, pynvml, psutil). FAISS via conda (\texttt{faiss-gpu=1.8.0} or \texttt{faiss-cpu}).
+
+\subsubsection{Data sets}
+Wikipedia 2018 dump, preprocessed with FlashRAG (512-word soft chunk limit) into $\sim$9.2M passages; six QA eval sets via FlashRAG. [FILL IN concrete reviewer-facing download steps — current README assumes paths are pre-populated.]
+
+\subsubsection{Models}
+Gated on HuggingFace Hub — reviewers need an HF token with Meta license acceptance for all three Llama generators.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Installation}
+\begin{verbatim}
+git clone https://github.com/zferic/RAGMark.git
+cd RAGMark
+
+python -m venv venv
+source venv/bin/activate
+
+pip install -r requirements.txt
+conda install -c pytorch faiss-gpu=1.8.0   # or faiss-cpu
+
+# edit config.py: HF_HOME, BASE_OUT,
+# WIKI_INDEX_DIR, WIKI_CORPUS_2018, DATASET_DIR
+
+# build/place a FAISS index (Flat/IVF/IVF-SQ) under
+# WIKI_INDEX_DIR via FlashRAG, plus the corpus JSONL
+# and FlashRAG eval JSONL files under DATASET_DIR
+\end{verbatim}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Experiment workflow}
+Each experiment is a sweep config in \texttt{testing\_callsmain\_sweep.py},
+run via \texttt{python testing\_callsmain\_sweep.py}:
+
+\begin{itemize}
+  \item {\bf Exp. 1 (Fig.~4, reranking): } \texttt{rerank=True}, \texttt{top\_ks=[0,1,3,5,10]}, all 3 generators $\times$ 6 datasets.
+  \item {\bf Exp. 2 (Fig.~5, compression): } \texttt{compress=True}, \texttt{compress\_method="llmlingua2"}, \texttt{top\_ks=[1,3,5,10]}, \texttt{compress\_rates=[0.2,0.4,0.6,0.8]}.
+  \item {\bf Exp. 3 (Fig.~9, trade-off): } naive pipeline (\texttt{rerank=False}, \texttt{compress=False}), \texttt{top\_ks=[0,1,3,5,10]}, all 3 generators.
+\end{itemize}
+
+Existing outputs are skipped, so interrupted sweeps resume cleanly.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Evaluation and expected results}
+\texttt{load\_evals\_executed.ipynb} loads all output files into
+\texttt{df\_results}/\texttt{df\_perf}/\texttt{df\_trace}.
+
+\begin{itemize}
+  \item {\bf Fig.~4: } \texttt{df\_perf} (stage latencies: embed, FAISS, rerank, TTFT, decode) merged with \texttt{df\_results} (ROUGE-L), grouped by dataset $\times$ model $\times$ top-$k$.
+  \item {\bf Fig.~5: } \texttt{df\_perf} filtered to the compression sweep, grouped by top-$k$ $\times$ compression rate $r$, plotting TTFT/decode/compress/FAISS/embed latency.
+  \item {\bf Fig.~9: } \texttt{df\_results} (ROUGE-L) merged with \texttt{df\_perf} (TTFT, decode, memory, SM\%), grouped by model $\times$ top-$k$, naive pipeline only.
+\end{itemize}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Methodology}
+\begin{itemize}
+  \item \url{https://www.acm.org/publications/policies/artifact-review-and-badging-current}
+  \item \url{https://cTuning.org/ae}
+\end{itemize}

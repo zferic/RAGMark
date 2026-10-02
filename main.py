@@ -89,13 +89,10 @@ args = parser.parse_args()
 # -------------------------------------------------------------------------
 # BASE OUTPUT DIRECTORY
 # -------------------------------------------------------------------------
-from config import BASE_OUT
+from config import BASE_OUT, OUT_SUFFIX
 
-#TESTING_DIR = f"{BASE_OUT}/testingevals"
-#TIMING_DIR = f"{BASE_OUT}/timingevals"
-
-TESTING_DIR = f"{BASE_OUT}/testingevals_a100"
-TIMING_DIR  = f"{BASE_OUT}/timingevals_a100"
+TESTING_DIR = f"{BASE_OUT}/testingevals{OUT_SUFFIX}"
+TIMING_DIR  = f"{BASE_OUT}/timingevals{OUT_SUFFIX}"
 
 os.makedirs(TESTING_DIR, exist_ok=True)
 os.makedirs(TIMING_DIR, exist_ok=True)
