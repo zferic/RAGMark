@@ -1,0 +1,13 @@
+# Iterative retrieval: each round's answer is appended to the query for the next round.
+# Same as --pipeline iterative, plus an early exit once the answer stops changing.
+name: iterative
+timing_suffix: iter          # emit *_iter_{i} timing keys
+loop:
+  iterations: 3
+  feedback: "{question} {answer}"
+  until: answer_unchanged
+nodes:
+  - {id: embed,    type: embed}
+  - {id: retrieve, type: retrieve, after: embed}
+  - {id: context,  type: context,  after: retrieve}
+  - {id: generate, type: generate, after: context, params: {prompt_type: auto}}

@@ -1,0 +1,10 @@
+# Retrieve a wide candidate set, rerank, compress, then generate.
+# Needs --rerank (loads the reranker) and a sweep config with compress=true.
+name: rerank_compress
+nodes:
+  - {id: embed,    type: embed}
+  - {id: retrieve, type: retrieve, after: embed}
+  - {id: rerank,   type: rerank,   after: retrieve, params: {top_n: 3}}
+  - {id: context,  type: context,  after: rerank}
+  - {id: compress, type: compress, after: context}
+  - {id: generate, type: generate, after: compress}

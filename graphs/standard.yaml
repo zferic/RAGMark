@@ -1,0 +1,8 @@
+# Single-pass RAG: embed -> retrieve -> context -> generate.
+# Run with:  python run_sweep.py ... --pipeline graph --graph_spec graphs/standard.yaml
+name: standard
+nodes:
+  - {id: embed,    type: embed}
+  - {id: retrieve, type: retrieve, after: embed}      # k defaults to rag_top_k of the sweep config
+  - {id: context,  type: context,  after: retrieve}
+  - {id: generate, type: generate, after: context}

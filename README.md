@@ -121,6 +121,30 @@ Update the paths in the notebook's first cell (`BASE`, `TESTING_DIR`, `TIMING_DI
 to match your `config.py`. The later cells plot the paper's Figures 4, 5 and 9 from whatever
 results are present.
 
+## Graph-based execution
+
+Pipelines are executed from a declarative graph of stages (`rag_system/graph/`) instead of hardcoded
+control flow. `--pipeline standard` and `--pipeline iterative` build their graphs automatically and
+produce the same results and timing columns as before. To define your own, write a YAML file and pass
+`--pipeline graph --graph_spec graphs/my_graph.yaml`:
+
+```yaml
+name: rerank_compress
+nodes:
+  - {id: embed,    type: embed}
+  - {id: retrieve, type: retrieve, after: embed}
+  - {id: rerank,   type: rerank,   after: retrieve, params: {top_n: 3}}
+  - {id: context,  type: context,  after: rerank}
+  - {id: compress, type: compress, after: context}
+  - {id: generate, type: generate, after: compress}
+```
+
+- **Nodes:** `embed`, `retrieve`, `rerank`, `context`, `compress`, `generate`. Each reads and writes a shared state dict and reports its own timing keys, so perf CSVs keep the same schema.
+- **Loops:** a `loop:` block (`iterations`, `feedback` template, optional `until` condition) repeats the graph, e.g. for iterative retrieval. See [graphs/iterative.yaml](graphs/iterative.yaml).
+- **Components:** models are still loaded once per sweep. A node needs its component to exist (e.g. a `rerank` node needs `--rerank`; a `compress` node needs a sweep config with `compress: true`), otherwise the graph fails at startup with a clear message.
+- **Custom stages:** subclass `Node` and decorate it with `@register_node("my_type")` (see [rag_system/graph/builtin.py](rag_system/graph/builtin.py)); it can then be used in any YAML graph.
+- `--pipeline standard_legacy` / `iterative_legacy` run the original hardcoded implementations for comparison.
+
 ## High Level Repository Overview
 
 | File | Purpose |
@@ -131,6 +155,8 @@ results are present.
 | `ae_evaluation/run_sweep_fig5.py` | Sweep orchestrator for Fig. 5 (compression-rate sweep) |
 | `ae_evaluation/load_evals_executed.ipynb` | Loads and merges all result files into DataFrames |
 | `ae_evaluation/ae_eval.sh` | Runs both sweeps + the analysis notebook end-to-end via Docker |
+| `rag_system/graph/` | Graph executor, node registry, and built-in nodes |
+| `graphs/` | Example YAML pipeline graphs |
 | `requirements.txt` | Python dependencies |
 | `rag_system/` | Core RAG modules (embedding, retrieval, generation, compression, reranking, timing) |
 
@@ -140,5 +166,5 @@ The following extensions are under active development and are not part of the ar
 
 - **New retrieval dataset.** Adding an additional retrieval corpus and its corresponding queries to broaden the workloads RAGMark can characterize beyond the datasets listed above.
 - **Local dataset preprocessing scripts.** Scripts for converting user-provided local corpora into the format RAGMark expects (cleaning, chunking, and embedding-ready output), so custom datasets can be benchmarked without manual preparation.
-- **Graph-based modeling of the framework.** Representing the RAG pipeline as a graph of stages (embedding, retrieval, reranking, compression, generation) to analyze how latency and resources flow through the system and to support reasoning about alternative pipeline configurations.
+- **Graph-based modeling of the framework.** The executor and YAML graphs described above are in place; remaining work is branching/conditional edges, running independent nodes concurrently, and using the graph to analyze how latency and resources flow through the system.
 - **Agentic RAG.** A separate module for agentic pipelines, in which an LLM decides when to retrieve, reformulates queries, and iterates over multiple retrieval and generation steps. It will be benchmarked independently of the single-pass pipeline so that its multi-step overheads can be measured on their own.

@@ -67,9 +67,15 @@ parser.add_argument("--base_out", type=str,
 parser.add_argument("--out_suffix", type=str, default="",
                     help='e.g. "_a100" appended to testingevals/timingevals dir names')
 parser.add_argument("--pipeline", type=str, default="standard",
-                    choices=["standard", "iterative"])
+                    choices=["standard", "iterative", "graph", "standard_legacy", "iterative_legacy"])
+parser.add_argument("--graph_spec", type=str, default=None,
+                    help='YAML graph definition; required with --pipeline graph (see graphs/)')
 
 args = parser.parse_args()
+if args.pipeline == "graph" and not args.graph_spec:
+    parser.error("--pipeline graph requires --graph_spec")
+PIPELINE_TAG = (f"graph-{os.path.splitext(os.path.basename(args.graph_spec))[0]}"
+                if args.pipeline == "graph" else args.pipeline)
 
 sweep_configs = json.loads(args.sweep_configs)
 eval_paths    = json.loads(args.eval_paths)
@@ -158,7 +164,7 @@ def make_prefix(cfg, dataset_name):
         idx_name,
         f"batch{int(args.batch)}",
         str(args.batch_size),
-        f"pipe{args.pipeline}",
+        f"pipe{PIPELINE_TAG}",
         dev_tag,
     ])
 
@@ -329,6 +335,7 @@ for eval_path in eval_paths:
         pipe_args.batch           = args.batch
         pipe_args.batch_size      = args.batch_size
         pipe_args.pipeline        = args.pipeline
+        pipe_args.graph_spec      = args.graph_spec
         pipe_args.iter_num        = 2
         pipe_args.rerank_top_n    = args.rerank_top_n
 
