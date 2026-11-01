@@ -2,6 +2,7 @@ import torch
 
 from ..timing import RAGTiming, reset_gpu_peak
 from ..utils import extract_answer
+from ..generation import TTFTRecorder, itl_stats
 from .base import Pipeline
 
 
@@ -115,6 +116,8 @@ class IterativePipeline(Pipeline):
             timing.record(f"generate_total_time_iter_{iter_idx}", gen_result["total_time"])
             timing.record(f"tokens_generated_iter_{iter_idx}", gen_result["tokens_generated"])
             timing.record(f"tokens_per_second_iter_{iter_idx}", gen_result["tokens_per_second"])
+            for k in ("itl_mean", "itl_p50", "itl_p95", "itl_max"):
+                timing.record(f"{k}_iter_{iter_idx}", gen_result[k])
 
             top_doc = docs[0][:120] + "..." if docs and len(docs[0]) > 120 else (docs[0] if docs else "")
             print(f"\n--- iter {iter_idx} ---")
@@ -137,6 +140,8 @@ class IterativePipeline(Pipeline):
         timing.record("generate_total_time", gen_result["total_time"])
         timing.record("tokens_generated", gen_result["tokens_generated"])
         timing.record("tokens_per_second", gen_result["tokens_per_second"])
+        for k in ("itl_mean", "itl_p50", "itl_p95", "itl_max"):
+            timing.record(k, gen_result[k])
         timing.record_tokens("context_tokens_before", len(self.generator.tokenizer.tokenize("\n".join(docs))))
         timing.record_tokens("context_tokens_after", len(self.generator.tokenizer.tokenize(context)))
 
@@ -250,6 +255,7 @@ class IterativePipeline(Pipeline):
                 timing.reset_gpu_peak(self.gen_device)
                 timing.capture_gpu_memory(f"gen_gpu_before_iter_{iter_idx}", self.gen_device)
 
+            recorder = TTFTRecorder(inputs["input_ids"].shape[-1])
             if tracer: tracer.mark(f"generate_start_iter_{iter_idx}")
             timing.start(f"generate_iter_{iter_idx}")
             with torch.no_grad():
@@ -258,8 +264,12 @@ class IterativePipeline(Pipeline):
                     max_new_tokens=32,
                     pad_token_id=self.generator.tokenizer.pad_token_id,
                     eos_token_id=self.generator.tokenizer.eos_token_id,
+                    logits_processor=[recorder],
                 )
             timing.end(f"generate_iter_{iter_idx}")
+            # per-step latency of the whole batch (every sequence advances one token per step)
+            for k, v in itl_stats(recorder.step_times).items():
+                timing.record(f"{k}_iter_{iter_idx}", v)
             if tracer: tracer.mark(f"generate_end_iter_{iter_idx}")
 
             if self.gen_device is not None:
@@ -282,5 +292,7 @@ class IterativePipeline(Pipeline):
         # top-level keys matching standard pipeline format for CSV compatibility
         timing.record_tokens("context_tokens_before", before_tokens)
         timing.record_tokens("context_tokens_after", after_tokens)
+        for k in ("itl_mean", "itl_p50", "itl_p95", "itl_max"):
+            timing.record(k, timing.data[f"{k}_iter_{iter_num - 1}"])
 
         return past_answers, docs_batch, timing
