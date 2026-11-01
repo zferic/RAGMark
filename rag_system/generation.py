@@ -10,12 +10,32 @@ class TTFTRecorder(LogitsProcessor):
     def __init__(self, input_length):
         self.input_length = input_length
         self.first_token_time = None
+        # One timestamp per decode step (the processor runs once per generated token,
+        # right before it is sampled). Gaps between consecutive steps = inter-token latency.
+        self.step_times = []
 
     def __call__(self, input_ids, scores):
+        torch.cuda.synchronize()
+        now = time.time()
+        self.step_times.append(now)
         if input_ids.shape[-1] == self.input_length + 1 and self.first_token_time is None:
-            torch.cuda.synchronize()
-            self.first_token_time = time.time()
+            self.first_token_time = now
         return scores
+
+
+def itl_stats(step_times):
+    """Inter-token latency summary (seconds) from per-step timestamps."""
+    gaps = sorted(b - a for a, b in zip(step_times, step_times[1:]))
+    if not gaps:
+        return {"itl_mean": 0, "itl_p50": 0, "itl_p95": 0, "itl_max": 0}
+    def pct(q):
+        return gaps[min(len(gaps) - 1, int(round(q * (len(gaps) - 1))))]
+    return {
+        "itl_mean": sum(gaps) / len(gaps),
+        "itl_p50": pct(0.50),
+        "itl_p95": pct(0.95),
+        "itl_max": gaps[-1],
+    }
 
 class Generator:
     def __init__(self, model_path: str, device=None, gpu_ids=None):
@@ -264,6 +284,7 @@ class Generator:
             "total_time": total_time,
             "tokens_generated": tokens_generated,
             "tokens_per_second": tokens_generated / decode_time if decode_time > 0 else 0,
+            **itl_stats(recorder.step_times),
         }
 
     def generate(self, question: str, context: str = None, max_new_tokens: int = 32):

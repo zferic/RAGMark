@@ -2,6 +2,7 @@ import torch
 
 from ..timing import RAGTiming, reset_gpu_peak
 from ..utils import extract_answer
+from ..generation import TTFTRecorder, itl_stats
 from .base import Pipeline
 
 
@@ -100,6 +101,8 @@ class StandardPipeline(Pipeline):
         timing.record("generate", gen_result["total_time"])
         timing.record("tokens_generated", gen_result["tokens_generated"])
         timing.record("tokens_per_second", gen_result["tokens_per_second"])
+        for k in ("itl_mean", "itl_p50", "itl_p95", "itl_max"):
+            timing.record(k, gen_result[k])
 
         # Aliases with _iter_0 suffix for compatibility with iterative pipeline timing schema
         for key in list(timing.data.keys()):
@@ -234,6 +237,7 @@ class StandardPipeline(Pipeline):
 
         timing.record("input_tokens_total", inputs["input_ids"].shape[0] * inputs["input_ids"].shape[1])
 
+        recorder = TTFTRecorder(inputs["input_ids"].shape[-1])
         if tracer: tracer.mark("generate_start")
         timing.start("generate")
         with torch.no_grad():
@@ -242,8 +246,12 @@ class StandardPipeline(Pipeline):
                 max_new_tokens=32,
                 pad_token_id=self.generator.tokenizer.pad_token_id,
                 eos_token_id=self.generator.tokenizer.eos_token_id,
+                logits_processor=[recorder],
             )
         timing.end("generate")
+        # per-step latency of the whole batch (every sequence advances one token per step)
+        for k, v in itl_stats(recorder.step_times).items():
+            timing.record(k, v)
         if tracer: tracer.mark("generate_end")
 
         if self.gen_device is not None:
