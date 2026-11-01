@@ -133,3 +133,12 @@ results are present.
 | `ae_evaluation/ae_eval.sh` | Runs both sweeps + the analysis notebook end-to-end via Docker |
 | `requirements.txt` | Python dependencies |
 | `rag_system/` | Core RAG modules (embedding, retrieval, generation, compression, reranking, timing) |
+
+## In progress
+
+The following extensions are under active development and are not part of the artifact evaluated in the publication.
+
+- **New retrieval dataset.** Adding an additional retrieval corpus and its corresponding queries to broaden the workloads RAGMark can characterize beyond the datasets listed above.
+- **Local dataset preprocessing scripts.** Scripts for converting user-provided local corpora into the format RAGMark expects (cleaning, chunking, and embedding-ready output), so custom datasets can be benchmarked without manual preparation.
+- **Graph-based modeling of the framework.** Representing the RAG pipeline as a graph of stages (embedding, retrieval, reranking, compression, generation) to analyze how latency and resources flow through the system and to support reasoning about alternative pipeline configurations.
+- **Agentic RAG.** A separate module for agentic pipelines, in which an LLM decides when to retrieve, reformulates queries, and iterates over multiple retrieval and generation steps. It will be benchmarked independently of the single-pass pipeline so that its multi-step overheads can be measured on their own.
