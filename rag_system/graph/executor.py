@@ -6,7 +6,8 @@ from .nodes import CONDITIONS, NODE_TYPES, StageContext
 from .spec import GraphSpec
 
 _TOP_LEVEL_KEYS = ("ttft", "decode_time", "generate_total_time", "tokens_generated",
-                   "tokens_per_second", "context_tokens_before", "context_tokens_after")
+                   "tokens_per_second", "itl_mean", "itl_p50", "itl_p95", "itl_max",
+                   "context_tokens_before", "context_tokens_after")
 
 
 class GraphExecutor:

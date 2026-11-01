@@ -1,6 +1,7 @@
 """Built-in node types: embed, retrieve, rerank, context, compress, generate."""
 import torch
 
+from ..generation import TTFTRecorder, itl_stats
 from ..timing import reset_gpu_peak
 from ..utils import extract_answer
 from .nodes import Node, register_node, register_condition
@@ -153,6 +154,8 @@ class GenerateNode(Node):
         t.record(f"generate{sfx}", res["total_time"])
         t.record(f"tokens_generated{sfx}", res["tokens_generated"])
         t.record(f"tokens_per_second{sfx}", res["tokens_per_second"])
+        for k in ("itl_mean", "itl_p50", "itl_p95", "itl_max"):
+            t.record(f"{k}{sfx}", res[k])
 
         state["raw"] = res["response"]
         state["answers"] = [extract_answer(res["response"])]
@@ -176,6 +179,7 @@ class GenerateNode(Node):
         t.capture_all_gpu_memory(f"gen_gpu_all_before{sfx}")
         t.record(f"input_tokens_total{sfx}", inputs["input_ids"].shape[0] * inputs["input_ids"].shape[1])
 
+        recorder = TTFTRecorder(inputs["input_ids"].shape[-1])
         ctx.mark("generate_start")
         t.start(f"generate{sfx}")
         with torch.no_grad():
@@ -184,9 +188,13 @@ class GenerateNode(Node):
                 max_new_tokens=32,
                 pad_token_id=g.tokenizer.pad_token_id,
                 eos_token_id=g.tokenizer.eos_token_id,
+                logits_processor=[recorder],
             )
         t.end(f"generate{sfx}")
         ctx.mark("generate_end")
+        # per-step latency of the whole batch (every sequence advances one token per step)
+        for k, v in itl_stats(recorder.step_times).items():
+            t.record(f"{k}{sfx}", v)
 
         if dev is not None:
             t.capture_gpu_memory(f"gen_gpu_after{sfx}", dev)
